@@ -1,0 +1,163 @@
+<!-- Orders Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+  <div class="container mx-auto px-4">
+    
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">My Orders</h1>
+      <p class="text-gray-600 text-lg">Track and manage your orders</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error && !isLoading) {
+      <div class="text-center py-20">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button 
+            (click)="loadUserOrders()" 
+            class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
+            Try Again
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Orders List -->
+    @if (!isLoading && !error && orders.length > 0) {
+      <div class="max-w-6xl mx-auto space-y-6">
+        @for (order of orders; track order._id) {
+          <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300">
+            
+            <!-- Order Header -->
+            <div class="bg-gradient-to-r from-emerald-500 to-emerald-600 p-6 text-white">
+              <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                <div>
+                  <h3 class="text-xl font-bold">Order #{{ order._id.slice(-8).toUpperCase() }}</h3>
+                  <p class="text-emerald-100">{{ formatDate(order.createdAt) }}</p>
+                </div>
+                <div class="flex items-center gap-4">
+                  <span class="px-4 py-2 bg-white/20 rounded-full text-sm font-medium">
+                    {{ getOrderStatus(order) }}
+                  </span>
+                  <span class="text-2xl font-bold">
+                    {{ order.totalOrderPrice | currency : 'EGP' : 'symbol' : '1.0-0' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Details -->
+            <div class="p-6">
+              
+              <!-- Payment & Delivery Info -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                
+                <!-- Payment Method -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                  <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="getPaymentMethodIcon(order.paymentMethodType)"></path>
+                    </svg>
+                    Payment Method
+                  </h4>
+                  <div class="flex items-center justify-between">
+                    <span class="capitalize font-medium">{{ order.paymentMethodType }}</span>
+                    <span class="px-3 py-1 rounded-full text-sm font-medium"
+                          [class]="order.isPaid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'">
+                      {{ order.isPaid ? 'Paid' : 'Pending' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Shipping Address -->
+                <div class="bg-gray-50 rounded-xl p-4">
+                  <h4 class="font-semibold text-gray-800 mb-3 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                    Shipping Address
+                  </h4>
+                  <div class="text-sm text-gray-600">
+                    <p class="font-medium">{{ order.shippingAddress.details }}</p>
+                    <p>{{ order.shippingAddress.city }}</p>
+                    <p>{{ order.shippingAddress.phone }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Order Items -->
+              <div class="border-t border-gray-200 pt-6">
+                <h4 class="font-semibold text-gray-800 mb-4">Order Items</h4>
+                <div class="space-y-4">
+                  @for (item of order.cartItems; track item.product._id) {
+                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-xl">
+                      
+                      <!-- Product Image -->
+                      <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden">
+                        <img 
+                          [src]="item.product.imageCover" 
+                          [alt]="item.product.title"
+                          class="w-full h-full object-cover"
+                          loading="lazy">
+                      </div>
+
+                      <!-- Product Details -->
+                      <div class="flex-1 min-w-0">
+                        <h5 class="font-medium text-gray-800 truncate">{{ item.product.title }}</h5>
+                        <p class="text-sm text-gray-500">Quantity: {{ item.count }}</p>
+                      </div>
+
+                      <!-- Price -->
+                      <div class="text-right">
+                        <p class="font-semibold text-emerald-600">
+                          {{ (item.price * item.count) | currency : 'EGP' : 'symbol' : '1.0-0' }}
+                        </p>
+                        <p class="text-sm text-gray-500">{{ item.price | currency : 'EGP' : 'symbol' : '1.0-0' }} each</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && !error && orders.length === 0) {
+      <div class="text-center py-20">
+        <div class="bg-white rounded-2xl shadow-lg p-12 max-w-md mx-auto">
+          <div class="bg-gray-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-4">No Orders Yet</h3>
+          <p class="text-gray-600 text-lg mb-8">You haven't placed any orders yet. Start shopping to see your orders here!</p>
+          <button 
+            routerLink="/home"
+            class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 font-semibold flex items-center mx-auto shadow-lg">
+            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+            </svg>
+            Start Shopping
+          </button>
+        </div>
+      </div>
+    }
+
+  </div>
+</section>

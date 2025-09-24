@@ -1,0 +1,269 @@
+<!-- Products Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100">
+  <div class="container mx-auto px-4">
+
+    <!-- Section Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">
+        @if (selectedCategory && selectedBrand) {
+        {{ selectedBrand }} {{ selectedCategory }} Products
+        } @else if (selectedCategory) {
+        {{ selectedCategory }} Products
+        } @else if (selectedBrand) {
+        {{ selectedBrand }} Products
+        } @else {
+        All Products
+        }
+      </h1>
+      <p class="text-gray-600 text-lg">
+        @if (selectedCategory && selectedBrand) {
+        Discover our {{ selectedBrand }} {{ selectedCategory.toLowerCase() }} collection
+        } @else if (selectedCategory) {
+        Discover our {{ selectedCategory.toLowerCase() }} collection
+        } @else if (selectedBrand) {
+        Explore our {{ selectedBrand }} product range
+        } @else {
+        Explore our complete product catalog
+        }
+      </p>
+    </div>
+
+    <!-- Search and Filters -->
+    <div class="max-w-4xl mx-auto mb-10">
+
+      <!-- Search Bar -->
+      <div class="max-w-md mx-auto mb-6">
+        <div class="relative">
+          <input [(ngModel)]="fromInput" type="text" placeholder="Search products..."
+            class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300">
+          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap justify-center gap-4 mb-6">
+
+        <!-- Category Filter -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm font-medium text-gray-700">Category:</label>
+          <select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
+            <option value="">All Categories</option>
+            @for (category of getUniqueCategories(); track category) {
+            <option [value]="category">{{ category }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Brand Filter -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm font-medium text-gray-700">Brand:</label>
+          <select [(ngModel)]="selectedBrand" (ngModelChange)="onFilterChange()"
+            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
+            <option value="">All Brands</option>
+            @for (brand of getUniqueBrands(); track brand) {
+            <option [value]="brand">{{ brand }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sort Filter -->
+        <div class="flex items-center space-x-2">
+          <label class="text-sm font-medium text-gray-700">Sort by:</label>
+          <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
+            class="px-5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
+            <option value="name">Name</option>
+            <option value="price">Price</option>
+            <option value="rating">Rating</option>
+          </select>
+        </div>
+
+        <!-- Clear Filters -->
+        @if (selectedCategory || selectedBrand || fromInput) {
+        <button (click)="selectedCategory = ''; selectedBrand = ''; fromInput = ''; onFilterChange()"
+          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300">
+          Clear Filters
+        </button>
+        }
+      </div>
+
+      <!-- Results Count -->
+      <div class="text-center text-gray-600 mb-6">
+        Showing {{ getFilteredProducts().length }} products
+        @if (selectedCategory) {
+        in {{ selectedCategory }}
+        }
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+    <div class="flex justify-center items-center py-20">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+    </div>
+    }
+
+    <!-- Error State -->
+    @if (error && !isLoading) {
+    <div class="text-center py-20">
+      <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
+        <p class="text-red-600 mb-4">{{ error }}</p>
+        <button (click)="loadProducts()"
+          class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
+          Try Again
+        </button>
+      </div>
+    </div>
+    }
+
+    <!-- Products Grid -->
+    @if (!isLoading && !error) {
+    @if (getFilteredProducts().length > 0) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      @for (product of getFilteredProducts() | search : fromInput; track product._id) {
+      <div
+        class="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group relative border border-gray-100">
+
+        <!-- Wishlist Heart Icon -->
+        <button (click)="toggleWishlist(product._id, $event)"
+          class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group/heart">
+
+          @if (isInWishlist(product._id)) {
+          <svg class="w-5 h-5 text-red-500 group-hover/heart:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
+              clip-rule="evenodd"></path>
+          </svg>
+          } @else {
+          <svg
+            class="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors duration-300 group-hover/heart:animate-pulse"
+            fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
+            </path>
+          </svg>
+          }
+        </button>
+
+        <!-- Product Link -->
+        <div [routerLink]="['/p_details', product._id]" class="cursor-pointer">
+
+          <!-- Product Image -->
+          <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 h-56">
+            <img [src]="product.imageCover" [alt]="product.title"
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:transform group-hover:rotate-2"
+              (error)="onImageError($event, product._id)" loading="lazy">
+
+            <!-- Image overlay with gradient -->
+            <div
+              class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            </div>
+
+            <!-- Sale Badge -->
+            <div
+              class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              Hot
+            </div>
+
+            <!-- Fallback placeholder -->
+            @if (isImageError(product._id)) {
+            <div
+              class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400">
+              <div class="text-center">
+                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z">
+                  </path>
+                </svg>
+                <p class="text-xs">Image not available</p>
+              </div>
+            </div>
+            }
+          </div>
+
+          <!-- Product Info -->
+          <div class="p-4">
+            <h1
+              class="text-gray-800 font-bold text-lg mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors duration-300">
+              {{ product.title.split(' ', 3).join(' ') }}
+            </h1>
+
+            <div class="flex justify-between items-center mb-3">
+              <h2 class="text-2xl font-bold text-emerald-600">
+                {{ product.price | currency : 'EGP' : 'symbol' : '1.0-0' }}
+              </h2>
+              <div class="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
+                <svg class="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                  <path
+                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
+                  </path>
+                </svg>
+                <span class="text-yellow-700 text-sm font-medium">{{ product.ratingsAverage }}</span>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <span
+                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                {{ product.category.name }}
+              </span>
+              <span class="text-xs text-gray-500">{{ product.ratingsQuantity }} reviews</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Add to Cart Button -->
+        <div class="p-4 pt-0">
+          <button (click)="addToCart(product._id)"
+            class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center group/btn">
+            <svg class="w-5 h-5 mr-2 group-hover/btn:animate-bounce" fill="none" stroke="currentColor"
+              viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-2.5L17.5 8.5M17.5 8.5L15 11"></path>
+            </svg>
+            Add to Cart
+          </button>
+        </div>
+
+      </div>
+      }
+    </div>
+
+    <!-- Empty State -->
+    @if (getFilteredProducts().length === 0) {
+    <div class="text-center py-20">
+      <div class="bg-white border border-gray-200 rounded-xl p-8 max-w-md mx-auto shadow-lg">
+        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
+          </path>
+        </svg>
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Products Found</h3>
+        <p class="text-gray-600 mb-4">
+          @if (selectedCategory) {
+          No products found in {{ selectedCategory }} category.
+          } @else {
+          No products match your search criteria.
+          }
+        </p>
+        <button (click)="selectedCategory = ''; fromInput = ''"
+          class="bg-emerald-500 text-white px-6 py-2 rounded-lg hover:bg-emerald-600 transition-colors duration-300">
+          Clear Filters
+        </button>
+      </div>
+    </div>
+    }
+    }
+    }
+  </div>
+</section>

@@ -1,0 +1,260 @@
+<section class="py-8 bg-gray-50 min-h-screen">
+  <div class="container mx-auto px-4">
+    
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-12">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-500"></div>
+        <span class="ml-3 text-gray-600">Loading checkout...</span>
+      </div>
+    }
+
+    <!-- Checkout Content -->
+    @if (!isLoading && cartData) {
+      <div class="max-w-6xl mx-auto">
+      
+      <!-- Page Header -->
+      <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Checkout</h1>
+        <p class="text-gray-600">Complete your order details</p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-8">
+        
+        <!-- Left Column - Forms -->
+        <div class="lg:col-span-2 space-y-6">
+          
+          <!-- Shipping Address Form -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+              Shipping Address
+            </h2>
+            
+            <form [formGroup]="checkoutForm" class="space-y-4">
+              
+              <!-- Address Details -->
+              <div class="relative">
+                <textarea 
+                  formControlName="details"
+                  id="details"
+                  rows="3"
+                  [class.border-red-300]="getFieldError('details')"
+                  [class.border-emerald-500]="isFieldValid('details')"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-300 resize-none"
+                  placeholder="Enter your full address details..."></textarea>
+                <label for="details" class="absolute -top-2 left-3 bg-white px-1 text-sm text-gray-600">
+                  Address Details *
+                </label>
+                
+                <!-- Error Message -->
+                @if (getFieldError('details')) {
+                  <div class="text-red-500 text-xs mt-1 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{ getFieldError('details') }}
+                  </div>
+                }
+              </div>
+
+              <!-- Phone Number -->
+              <div class="relative">
+                <input 
+                  formControlName="phone"
+                  type="tel"
+                  id="phone"
+                  [class.border-red-300]="getFieldError('phone')"
+                  [class.border-emerald-500]="isFieldValid('phone')"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-300"
+                  placeholder="01xxxxxxxxx" />
+                <label for="phone" class="absolute -top-2 left-3 bg-white px-1 text-sm text-gray-600">
+                  Phone Number *
+                </label>
+                
+                <!-- Error Message -->
+                @if (getFieldError('phone')) {
+                  <div class="text-red-500 text-xs mt-1 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{ getFieldError('phone') }}
+                  </div>
+                }
+              </div>
+
+              <!-- City -->
+              <div class="relative">
+                <input 
+                  formControlName="city"
+                  type="text"
+                  id="city"
+                  [class.border-red-300]="getFieldError('city')"
+                  [class.border-emerald-500]="isFieldValid('city')"
+                  class="block w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors duration-300"
+                  placeholder="Enter your city" />
+                <label for="city" class="absolute -top-2 left-3 bg-white px-1 text-sm text-gray-600">
+                  City *
+                </label>
+                
+                <!-- Error Message -->
+                @if (getFieldError('city')) {
+                  <div class="text-red-500 text-xs mt-1 flex items-center">
+                    <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                    </svg>
+                    {{ getFieldError('city') }}
+                  </div>
+                }
+              </div>
+            </form>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+              <svg class="w-5 h-5 mr-2 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+              </svg>
+              Payment Method
+            </h2>
+            
+            <div class="space-y-3">
+              <!-- Cash Payment -->
+              <div 
+                (click)="selectPaymentMethod('cash')"
+                [class.border-emerald-500]="paymentMethod === 'cash'"
+                [class.bg-emerald-50]="paymentMethod === 'cash'"
+                class="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-emerald-300 transition-colors duration-300">
+                <div class="flex items-center">
+                  <input 
+                    type="radio" 
+                    id="cash"
+                    name="payment"
+                    [checked]="paymentMethod === 'cash'"
+                    class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 focus:ring-emerald-500">
+                  <label for="cash" class="ml-3 flex-1 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="font-medium text-gray-800">Cash on Delivery</div>
+                        <div class="text-sm text-gray-600">Pay when you receive your order</div>
+                      </div>
+                      <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                      </svg>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Online Payment -->
+              <div 
+                (click)="selectPaymentMethod('online')"
+                [class.border-emerald-500]="paymentMethod === 'online'"
+                [class.bg-emerald-50]="paymentMethod === 'online'"
+                class="border-2 border-gray-200 rounded-lg p-4 cursor-pointer hover:border-emerald-300 transition-colors duration-300">
+                <div class="flex items-center">
+                  <input 
+                    type="radio" 
+                    id="online"
+                    name="payment"
+                    [checked]="paymentMethod === 'online'"
+                    class="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 focus:ring-emerald-500">
+                  <label for="online" class="ml-3 flex-1 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <div class="font-medium text-gray-800">Online Payment</div>
+                        <div class="text-sm text-gray-600">Pay securely with card or digital wallet</div>
+                      </div>
+                      <div class="flex space-x-2">
+                        <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                        </svg>
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column - Order Summary -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-lg shadow-md p-6 sticky top-4">
+            <h2 class="text-xl font-semibold text-gray-800 mb-4">Order Summary</h2>
+            
+            <!-- Cart Items -->
+            <div class="space-y-3 mb-4">
+              @for (item of cartData.products; track item.product._id) {
+                <div class="flex items-center space-x-3">
+                <img [src]="item.product.imageCover" [alt]="item.product.title" class="w-12 h-12 object-cover rounded-lg">
+                <div class="flex-1">
+                  <h4 class="text-sm font-medium text-gray-800 line-clamp-1">{{ item.product.title }}</h4>
+                  <p class="text-xs text-gray-600">Qty: {{ item.count }}</p>
+                </div>
+                <div class="text-sm font-medium text-emerald-600">
+                  {{ item.price * item.count }} EGP
+                </div>
+                </div>
+              }
+            </div>
+
+            <hr class="my-4">
+
+            <!-- Totals -->
+            <div class="space-y-2">
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Subtotal</span>
+                <span class="font-medium">{{ cartData.totalCartPrice }} EGP</span>
+              </div>
+              <div class="flex justify-between text-sm">
+                <span class="text-gray-600">Shipping</span>
+                <span class="font-medium text-green-600">Free</span>
+              </div>
+              <hr class="my-2">
+              <div class="flex justify-between text-lg font-semibold">
+                <span>Total</span>
+                <span class="text-emerald-600">{{ cartData.totalCartPrice }} EGP</span>
+              </div>
+            </div>
+
+            <!-- Place Order Button -->
+            <button 
+              (click)="processOrder()"
+              [disabled]="checkoutForm.invalid || isProcessingPayment"
+              class="w-full mt-6 bg-emerald-500 text-white py-3 px-4 rounded-lg hover:bg-emerald-600 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors duration-300 font-medium flex items-center justify-center">
+              
+              @if (isProcessingPayment) {
+                <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 818-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              }
+              
+              @if (paymentMethod === 'online') {
+                {{ isProcessingPayment ? 'Redirecting to Stripe...' : 'Pay with Stripe' }}
+              } @else {
+                {{ isProcessingPayment ? 'Processing Order...' : 'Place Order (Cash)' }}
+              }
+            </button>
+
+            <!-- Security Note -->
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+              <div class="flex items-center text-sm text-gray-600">
+                <svg class="w-4 h-4 mr-2 text-green-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"></path>
+                </svg>
+                Your payment information is secure and encrypted
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      </div>
+    }
+  </div>
+</section>

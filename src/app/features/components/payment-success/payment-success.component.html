@@ -1,0 +1,117 @@
+<section class="py-8 bg-gray-50 min-h-screen flex items-center justify-center">
+  <div class="container mx-auto px-4">
+    
+    <!-- Verifying Payment -->
+    @if (isVerifying) {
+      <div class="text-center">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-md mx-auto">
+          <div class="animate-spin rounded-full h-16 w-16 border-b-4 border-emerald-500 mx-auto mb-4"></div>
+          <h2 class="text-xl font-semibold text-gray-800 mb-2">Verifying Payment</h2>
+          <p class="text-gray-600">Please wait while we confirm your payment...</p>
+        </div>
+      </div>
+    }
+
+    <!-- Payment Success -->
+    @if (!isVerifying && paymentVerified) {
+      <div class="text-center">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-lg mx-auto">
+          
+          <!-- Success Icon -->
+          <div class="mb-6">
+            <div class="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Success Message -->
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
+          <p class="text-gray-600 mb-6">Thank you for your order. Your payment has been processed successfully.</p>
+
+          <!-- Order Details -->
+          @if (orderDetails) {
+            <div class="bg-gray-50 rounded-lg p-4 mb-6 text-left">
+              <h3 class="font-semibold text-gray-800 mb-2">Order Details:</h3>
+              <div class="space-y-1 text-sm">
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Order ID:</span>
+                  <span class="font-medium">{{ orderDetails.id || orderDetails._id }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Total Amount:</span>
+                  <span class="font-medium text-emerald-600">{{ orderDetails.totalOrderPrice }} EGP</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-gray-600">Payment Method:</span>
+                  <span class="font-medium">Online Payment</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button 
+              (click)="goToOrders()"
+              class="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 font-medium">
+              View Orders
+            </button>
+            <button 
+              (click)="continueShopping()"
+              class="border border-emerald-500 text-emerald-600 px-6 py-3 rounded-lg hover:bg-emerald-50 transition-colors duration-300 font-medium">
+              Continue Shopping
+            </button>
+          </div>
+
+          <!-- Auto Redirect Notice -->
+          <p class="text-xs text-gray-500 mt-4">
+            You will be redirected to orders page in a few seconds...
+          </p>
+        </div>
+      </div>
+    }
+
+    <!-- Payment Failed -->
+    @if (!isVerifying && !paymentVerified) {
+      <div class="text-center">
+        <div class="bg-white rounded-lg shadow-lg p-8 max-w-lg mx-auto">
+          
+          <!-- Error Icon -->
+          <div class="mb-6">
+            <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <svg class="w-10 h-10 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Error Message -->
+          <h1 class="text-2xl font-bold text-gray-800 mb-2">Payment Verification Failed</h1>
+          <p class="text-gray-600 mb-6">We couldn't verify your payment. Please contact support or try again.</p>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-col sm:flex-row gap-3 justify-center">
+            <button 
+              (click)="handleVerificationError()"
+              class="bg-emerald-500 text-white px-6 py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 font-medium">
+              Try Again
+            </button>
+            <button 
+              (click)="continueShopping()"
+              class="border border-gray-300 text-gray-600 px-6 py-3 rounded-lg hover:bg-gray-50 transition-colors duration-300 font-medium">
+              Back to Shopping
+            </button>
+          </div>
+
+          <!-- Auto Redirect Notice -->
+          <p class="text-xs text-gray-500 mt-4">
+            You will be redirected to orders page in a few seconds...
+          </p>
+        </div>
+      </div>
+    }
+
+  </div>
+</section>

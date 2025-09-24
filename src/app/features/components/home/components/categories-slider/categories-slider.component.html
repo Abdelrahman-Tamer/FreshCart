@@ -1,0 +1,19 @@
+<section class="main-section">
+
+
+
+  <div class="container-auto">
+    <owl-carousel-o [options]="customOptions">
+
+    @for (category of allCategories; track category._id) {
+      <ng-template carouselSlide [id]="category._id">
+        <img [src]="category.image" class="h-[250px]" [alt]="category.name">
+        <h2> {{category.name}} </h2>
+      </ng-template>
+    }
+
+  </owl-carousel-o>
+  </div>
+
+
+</section>

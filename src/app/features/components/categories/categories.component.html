@@ -1,0 +1,112 @@
+<!-- Categories Section -->
+<section class="py-12 bg-white">
+  <div class="container mx-auto px-4">
+    
+    <!-- Section Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">Shop by Category</h1>
+      <p class="text-gray-600 text-lg">Explore our wide range of product categories</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error && !isLoading) {
+      <div class="text-center py-20">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button 
+            (click)="getAllCategories()" 
+            class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
+            Try Again
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Categories Grid -->
+    @if (!isLoading && !error && allCategories.length > 0) {
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+        @for (category of allCategories; track category._id) {
+          <div class="group cursor-pointer" (click)="navigateToCategory(category)">
+            <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
+              
+              <!-- Category Image -->
+              <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 h-48">
+                <img 
+                  [src]="category.image" 
+                  [alt]="category.name"
+                  [attr.data-category-id]="category._id" 
+                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                  (error)="onImageError($event)"
+                  loading="lazy">
+                
+                <!-- Image overlay -->
+                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                
+                <!-- Category Badge -->
+                <div class="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  {{ category.name }}
+                </div>
+
+                <!-- Fallback placeholder -->
+                @if (isImageError(category._id)) {
+                  <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400">
+                    <div class="text-center">
+                      <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                      </svg>
+                      <p class="text-xs font-medium">Category</p>
+                    </div>
+                  </div>
+                }
+              </div>
+
+              <!-- Category Info -->
+              <div class="p-4 text-center">
+                <h3 class="text-lg font-bold text-gray-800 group-hover:text-emerald-600 transition-colors duration-300 mb-2">
+                  {{ category.name }}
+                </h3>
+                <p class="text-sm text-gray-500 mb-3">
+                  {{ category.name }} products
+                </p>
+                
+                <!-- View Products Button -->
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <span class="inline-flex items-center text-emerald-600 font-medium text-sm">
+                    View Products
+                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
+                    </svg>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- Empty State -->
+    @if (!isLoading && !error && allCategories.length === 0) {
+      <div class="text-center py-20">
+        <div class="bg-gray-50 border border-gray-200 rounded-xl p-8 max-w-md mx-auto">
+          <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-gray-800 mb-2">No Categories Found</h3>
+          <p class="text-gray-600">There are no categories available at the moment.</p>
+        </div>
+      </div>
+    }
+  </div>
+</section>
