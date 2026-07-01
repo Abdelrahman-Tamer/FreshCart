@@ -1,3 +1,14 @@
 {
-  "framework": "angular"
+  "framework": "angular",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist/e-commerce",
+  "functions": {
+    "api/index.mjs": {
+      "includeFiles": "dist/e-commerce/**"
+    }
+  },
+  "rewrites": [
+    { "source": "/", "destination": "/api" },
+    { "source": "/(.*)", "destination": "/api" }
+  ]
 }
