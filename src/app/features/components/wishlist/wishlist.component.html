@@ -1,0 +1,217 @@
+<!-- Wishlist Section -->
+<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+  <div class="container mx-auto px-4">
+    
+    <!-- Wishlist Header -->
+    <div class="text-center mb-10">
+      <h1 class="text-4xl font-bold text-gray-800 mb-4">My Wishlist</h1>
+      <p class="text-gray-600 text-lg">Save your favorite items for later</p>
+    </div>
+
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    }
+
+    <!-- Error State -->
+    @if (error && !isLoading) {
+      <div class="text-center py-20">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <button 
+            (click)="loadWishlist()" 
+            class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
+            Try Again
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Wishlist Items -->
+    @if (!isLoading && !error && wishlistItems.length > 0) {
+      <div class="max-w-6xl mx-auto">
+        
+        <!-- Wishlist Summary -->
+        <div class="bg-white rounded-2xl shadow-lg p-6 mb-8">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="bg-red-100 p-3 rounded-full">
+                <svg class="w-8 h-8 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                </svg>
+              </div>
+              <div>
+                <h2 class="text-2xl font-bold text-gray-800">{{ wishlistItems.length }} Items in Wishlist</h2>
+                <p class="text-gray-600">Your saved favorites are ready to purchase</p>
+              </div>
+            </div>
+            <div class="flex items-center space-x-3">
+              <button 
+                (click)="clearWishlist()"
+                class="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors duration-300 font-medium">
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wishlist Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          @for (product of wishlistItems; track product._id) {
+            <div class="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 group relative">
+              
+              <!-- Remove from Wishlist Button -->
+              <button 
+                (click)="removeFromWishlist(product._id)"
+                class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group/heart">
+                <svg class="w-5 h-5 text-red-500 group-hover/heart:animate-pulse" 
+                     fill="currentColor" 
+                     viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                </svg>
+              </button>
+
+              <!-- Product Link -->
+              <div [routerLink]="['/p_details', product._id]" class="cursor-pointer">
+                
+                <!-- Product Image -->
+                <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 h-56">
+                  <img 
+                    [src]="product.imageCover" 
+                    [alt]="product.title"
+                    class="w-full h-full object-cover transition-transform duration-500 group-hover:rotate-2"
+                    (error)="onImageError($event, product._id)"
+                    loading="lazy">
+                  
+                  <!-- Image overlay -->
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  
+                  <!-- Wishlist Badge -->
+                  <div class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    Saved
+                  </div>
+
+                  <!-- Fallback placeholder -->
+                  @if (isImageError(product._id)) {
+                    <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400">
+                      <div class="text-center">
+                        <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                        </svg>
+                        <p class="text-xs">Image not available</p>
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <!-- Product Info -->
+                <div class="p-4">
+                  <h3 class="text-gray-800 font-bold text-lg mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors duration-300">
+                    {{ product.title.split(' ', 3).join(' ') }}
+                  </h3>
+                  
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-2xl font-bold text-emerald-600">
+                      {{ product.price | currency : 'EGP' : 'symbol' : '1.0-0' }}
+                    </span>
+                    <div class="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
+                      <svg class="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                      </svg>
+                      <span class="text-yellow-700 text-sm font-medium">{{ product.ratingsAverage }}</span>
+                    </div>
+                  </div>
+                  
+                  <div class="flex items-center justify-between">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                      {{ product.category.name }}
+                    </span>
+                    <span class="text-xs text-gray-500">{{ product.ratingsQuantity }} reviews</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add to Cart Button -->
+              <div class="p-4 pt-0">
+                <button 
+                  (click)="addToCart(product._id)" 
+                  class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 font-medium flex items-center justify-center group/btn">
+                  <svg class="w-5 h-5 mr-2 group-hover/btn:animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-2.5L17.5 8.5M17.5 8.5L15 11"></path>
+                  </svg>
+                  Add to Cart
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Wishlist Actions -->
+        <div class="mt-12 text-center">
+          <div class="bg-white rounded-2xl shadow-lg p-8">
+            <h3 class="text-2xl font-bold text-gray-800 mb-4">Ready to purchase your favorites?</h3>
+            <p class="text-gray-600 mb-6">Add items to your cart and complete your order</p>
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+              <button 
+                routerLink="/home"
+                class="px-8 py-4 border-2 border-emerald-500 text-emerald-600 rounded-xl hover:bg-emerald-50 transition-all duration-300 font-semibold flex items-center justify-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
+                Continue Shopping
+              </button>
+              <button 
+                routerLink="/products"
+                class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 font-semibold flex items-center justify-center shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                Browse All Products
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Empty Wishlist State -->
+    @if (!isLoading && !error && wishlistItems.length === 0) {
+      <div class="max-w-2xl mx-auto text-center py-20">
+        <div class="bg-white rounded-2xl shadow-lg p-12">
+          <div class="bg-red-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+            <svg class="w-12 h-12 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+            </svg>
+          </div>
+          <h3 class="text-3xl font-bold text-gray-800 mb-4">Your wishlist is empty</h3>
+          <p class="text-gray-600 text-lg mb-8">Start adding items to your wishlist by clicking the heart icon on any product!</p>
+          <div class="flex flex-col sm:flex-row gap-4 justify-center">
+            <button 
+              routerLink="/home"
+              class="px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-300 font-semibold flex items-center justify-center shadow-lg">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+              </svg>
+              Start Shopping
+            </button>
+            <button 
+              routerLink="/products"
+              class="px-8 py-4 border-2 border-emerald-500 text-emerald-600 rounded-xl hover:bg-emerald-50 transition-all duration-300 font-semibold flex items-center justify-center">
+              <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+              Browse Products
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+  </div>
+</section>
