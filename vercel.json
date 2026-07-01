@@ -1,7 +1,3 @@
 {
-  "buildCommand": "npm run build",
-  "outputDirectory": "dist/e-commerce",
-  "devCommand": "ng serve",
-  "installCommand": "npm install",
   "framework": "angular"
 }

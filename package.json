@@ -24,6 +24,9 @@
     ]
   },
   "private": true,
+"engines": {
+  "node": ">=20.11.0"
+},
   "dependencies": {
     "@angular/animations": "^20.2.1",
     "@angular/common": "^20.2.1",
