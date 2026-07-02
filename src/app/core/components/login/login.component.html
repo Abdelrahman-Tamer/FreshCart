@@ -1,44 +1,48 @@
-<section class="my-18 flex justify-center items-center">
+<section class="min-h-[calc(100vh-80px)] flex justify-center items-center py-12">
+  <div class="md:w-[30%] mx-3 w-full shadow-md rounded-2xl p-5">
+    <h1 class="section-head font-black text-center">Login Now</h1>
 
+    <form [formGroup]="loginForm" (ngSubmit)="login()">
+      <div class="relative my-5">
+        <input formControlName="email" type="email" id="login_email"
+          class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
+          placeholder=" " />
+        <label for="login_email"
+          class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
+      </div>
 
-    <div class=" md:w-[30%]  mx-3 w-full shadow-md rounded-2xl p-5">
+      <div class="relative my-5">
+        <input formControlName="password" type="password" id="login_password"
+          class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
+          placeholder=" " />
+        <label for="login_password"
+          class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
+      </div>
 
-        <h1 class="section-head font-black text-center">Login Now</h1>
+      <button [disabled]="loginForm.invalid || isLoading"
+        class="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-300 flex items-center justify-center">
+        @if (isLoading) {
+          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Signing in...
+        } @else {
+          Login
+        }
+      </button>
+    </form>
 
-        <form [formGroup]="loginForm" (ngSubmit)="login()">
-
-            <div class="relative my-5">
-                <input formControlName="email" type="email" id="floating_filled"
-                    class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none   focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
-                    placeholder=" " />
-                <label for="floating_filled"
-                    class="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
-            </div>
-            <div class="relative my-5">
-                <input formControlName="password" type="password" id="floating_filled"
-                    class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none   focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
-                    placeholder=" " />
-                <label for="floating_filled"
-                    class="absolute text-sm text-gray-500  duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
-            </div>
-
-            <button [disabled]="loginForm.invalid" class="main-btn">Login</button>
-
-
-        </form>
-        <div class="text-center mt-4 space-y-2 flex justify-center items-center">
-            <p class="text-sm text-gray-500"> Forgot Password? <span
-                    class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300">
-                    <a routerLink="/forgot-password"
-                        class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300 cursor-pointer">
-                        Click here
-                    </a>
-
-                </span>
-            </p>
-        </div>
-
+    <div class="text-center mt-4 space-y-2 flex justify-center items-center">
+      <p class="text-sm text-gray-500">
+        Forgot Password?
+        <span class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300">
+          <a routerLink="/forgot-password"
+            class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300 cursor-pointer">
+            Click here
+          </a>
+        </span>
+      </p>
     </div>
-
-
+  </div>
 </section>

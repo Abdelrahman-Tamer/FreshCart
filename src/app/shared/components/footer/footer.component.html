@@ -1,35 +1,39 @@
 <footer class="bg-gray-200 py-10">
   <div class="w-11/12 mx-auto">
-    <h2 class="m-0 text-2xl">Get The FreshCart App</h2>
-    <p class="text-gray-500 text-sm">
+    <h2 class="m-0 text-2xl font-bold text-gray-800">Get The FreshCart App</h2>
+    <p class="text-gray-500 text-sm mb-4">
       We Will Send You a Link, Open it on Your Phone to download the app
     </p>
 
-    <div class="flex items-center gap-3 text-nowrap">
-      <input
-        type="text"
-        class="w-full rounded-lg border-gray-300"
-        placeholder="Email"
-      />
-      <button class="btn-main">Share App Link</button>
+    <div class="flex flex-col sm:flex-row items-stretch gap-3 mb-6">
+      <input type="email"
+        class="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+        placeholder="Email" />
+      <button class="bg-emerald-500 text-white px-6 py-2.5 rounded-lg hover:bg-emerald-600 transition-colors duration-300 font-medium whitespace-nowrap cursor-pointer">
+        Share App Link
+      </button>
     </div>
 
-    <hr />
+    <hr class="border-gray-300 mb-6" />
 
-    <div class="pay-details md:flex justify-between items-center my-5">
-      <div class="flex items-center gap-2">
-        <h3 class="text-sm m-0">Payment partners</h3>
-        <img src="./images/amazon-pay.png" width="50px" alt="" />
-        <img src="./images/American-Express-Color.png" width="50px" alt="" />
-        <img src="./images/paypal.png" width="50px" alt="" />
-        <img src="./images/mastercard.webp" width="50px" alt="" />
+    <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3">
+        <h3 class="text-sm font-medium text-gray-700">Payment partners</h3>
+        <img src="./images/amazon-pay.png" class="h-8 w-auto" alt="Amazon Pay" />
+        <img src="./images/American-Express-Color.png" class="h-8 w-auto" alt="American Express" />
+        <img src="./images/paypal.png" class="h-8 w-auto" alt="PayPal" />
+        <img src="./images/mastercard.webp" class="h-8 w-auto" alt="Mastercard" />
       </div>
 
-      <div class="flex items-center gap-2">
-        <h3 class="h6 m-0">Get Deliveries with FreshCart</h3>
-        <img src="./images/get-google-play.png" width="100px" alt="" />
-        <img src="./images/get-apple-store.png" width="100px" alt="" />
+      <div class="flex items-center gap-3">
+        <h3 class="text-sm font-medium text-gray-700">Get Deliveries with FreshCart</h3>
+        <img src="./images/get-google-play.png" class="h-10 w-auto" alt="Google Play" />
+        <img src="./images/get-apple-store.png" class="h-10 w-auto" alt="App Store" />
       </div>
+    </div>
+
+    <div class="mt-6 text-center text-xs text-gray-500">
+      &copy; {{ currentYear }} FreshCart. All rights reserved.
     </div>
   </div>
 </footer>

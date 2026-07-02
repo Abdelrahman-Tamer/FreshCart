@@ -1,10 +1,12 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, DestroyRef, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { WishlistService } from '../../../shared/services/Wishlist/wishlist.service';
 import { ProductsService } from '../../../shared/services/Products/products.service';
 import { CartService } from '../../../shared/services/Cart/cart.service';
 import { ToastrService } from 'ngx-toastr';
+import { catchError, map, of, switchMap } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-wishlist',
@@ -24,6 +26,7 @@ export class WishlistComponent implements OnInit {
   private _ProductsService = inject(ProductsService);
   private _CartService = inject(CartService);
   private toastr = inject(ToastrService);
+  private destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.loadWishlist();
@@ -33,29 +36,29 @@ export class WishlistComponent implements OnInit {
     this.isLoading = true;
     this.error = null;
     
-    // Subscribe to wishlist changes
-    this._WishlistService.wishlistItems$.subscribe(localWishlist => {
-      if (localWishlist.length === 0) {
-        this.wishlistItems = [];
-        this.isLoading = false;
-        return;
-      }
+    this._WishlistService.wishlistItems$.pipe(
+      switchMap(localWishlist => {
+        if (localWishlist.length === 0) {
+          return of([]);
+        }
 
-      // Load product details for each wishlist item
-      this._ProductsService.getAllProducts().subscribe({
-        next: (response) => {
+        return this._ProductsService.getAllProducts().pipe(
+          map((response) => {
           const allProducts = response.data || response;
-          this.wishlistItems = allProducts.filter((product: any) => 
+          return allProducts.filter((product: any) =>
             localWishlist.includes(product._id)
           );
-          this.isLoading = false;
-        },
-        error: (err) => {
-          this.error = 'Failed to load wishlist items';
-          this.isLoading = false;
-          console.error('Error loading wishlist:', err);
-        }
-      });
+          }),
+          catchError(() => {
+            this.error = 'Failed to load wishlist items';
+            return of([]);
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe((wishlistItems) => {
+      this.wishlistItems = wishlistItems;
+      this.isLoading = false;
     });
   }
 
@@ -71,8 +74,7 @@ export class WishlistComponent implements OnInit {
         this.toastr.success(res.message, res.status, {
           timeOut: 3000,
           closeButton: true,
-          progressBar: true,
-          positionClass: 'toast-top-right'
+          progressBar: true
         });
       },
       error: (err) => {

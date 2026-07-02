@@ -17,6 +17,15 @@ export const appConfig: ApplicationConfig = {
     provideClientHydration(withEventReplay()),
     provideAnimations(),
     importProvidersFrom(CookieService),
-    provideToastr(),
+    provideToastr({
+      positionClass: 'toast-top-right',
+      timeOut: 3000,
+      closeButton: true,
+      progressBar: true,
+      easeTime: 300,
+      newestOnTop: true,
+      preventDuplicates: true,
+      toastClass: 'ngx-toastr freshcart-toast',
+    }),
   ]
 };

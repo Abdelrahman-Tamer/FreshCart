@@ -28,6 +28,7 @@
       </p>
     </div>
 
+    @if (products.length > 0) {
     <!-- Search and Filters -->
     <div class="max-w-4xl mx-auto mb-10">
 
@@ -94,12 +95,13 @@
 
       <!-- Results Count -->
       <div class="text-center text-gray-600 mb-6">
-        Showing {{ getFilteredProducts().length }} products
+        Showing {{ (getFilteredProducts() | search : fromInput).length }} products
         @if (selectedCategory) {
         in {{ selectedCategory }}
         }
       </div>
     </div>
+    }
 
     <!-- Loading State -->
     @if (isLoading) {
@@ -127,10 +129,10 @@
     }
 
     <!-- Products Grid -->
-    @if (!isLoading && !error) {
-    @if (getFilteredProducts().length > 0) {
+    @if (!isLoading && !error && products.length > 0) {
+    @if ((getFilteredProducts() | search : fromInput).length > 0) {
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      @for (product of getFilteredProducts() | search : fromInput; track product._id) {
+      @for (product of getPaginatedProducts(getFilteredProducts() | search : fromInput); track product._id) {
       <div
         class="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group relative border border-gray-100">
 
@@ -240,7 +242,7 @@
     </div>
 
     <!-- Empty State -->
-    @if (getFilteredProducts().length === 0) {
+    @if ((getFilteredProducts() | search : fromInput).length === 0) {
     <div class="text-center py-20">
       <div class="bg-white border border-gray-200 rounded-xl p-8 max-w-md mx-auto shadow-lg">
         <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

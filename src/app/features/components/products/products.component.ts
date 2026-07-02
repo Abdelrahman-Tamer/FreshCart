@@ -26,7 +26,7 @@ export class ProductsComponent implements OnInit {
     private route: ActivatedRoute
   ) {}
 
-  products!: IProduct[]
+  products: IProduct[] = [];
   isLoading = true;
   error = '';
   imageErrors: Set<string> = new Set();
@@ -98,14 +98,16 @@ export class ProductsComponent implements OnInit {
   }
 
   // Get paginated products
-  getPaginatedProducts(): IProduct[] {
+  getPaginatedProducts(products: IProduct[] = this.getFilteredProducts()): IProduct[] {
     const startIndex = (this.currentPage - 1) * this.itemsPerPage;
     const endIndex = startIndex + this.itemsPerPage;
-    return this.getFilteredProducts().slice(startIndex, endIndex);
+    return products.slice(startIndex, endIndex);
   }
 
   // Get filtered products
   getFilteredProducts(): IProduct[] {
+    if (!this.products?.length) return [];
+
     let filtered = [...this.products];
 
     // Filter by category
@@ -160,8 +162,7 @@ export class ProductsComponent implements OnInit {
         this.toastr.success(res.message, res.status, {
           timeOut: 3000,
           closeButton: true,
-          progressBar: true,
-          positionClass: 'toast-top-right'
+          progressBar: true
         });
       },
       error: (err) => {
@@ -180,16 +181,14 @@ export class ProductsComponent implements OnInit {
       this.toastr.info('Removed from wishlist', 'Wishlist', {
         timeOut: 2000,
         closeButton: true,
-        progressBar: true,
-        positionClass: 'toast-top-right'
+        progressBar: true
       });
     } else {
       this._WishlistService.addToLocalWishlist(productId);
       this.toastr.success('Added to wishlist', 'Wishlist', {
         timeOut: 2000,
         closeButton: true,
-        progressBar: true,
-        positionClass: 'toast-top-right'
+        progressBar: true
       });
     }
   }
@@ -219,11 +218,15 @@ export class ProductsComponent implements OnInit {
 
   // Get unique categories for filter
   getUniqueCategories(): string[] {
+    if (!this.products?.length) return [];
+
     return [...new Set(this.products.map(p => p.category.name))];
   }
 
   // Get unique brands for filter
   getUniqueBrands(): string[] {
+    if (!this.products?.length) return [];
+
     return [...new Set(this.products.filter(p => p.brand && p.brand.name).map(p => p.brand.name))];
   }
 

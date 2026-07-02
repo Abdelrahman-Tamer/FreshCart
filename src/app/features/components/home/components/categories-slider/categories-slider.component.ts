@@ -1,5 +1,5 @@
-import { Component } from '@angular/core';
-import { ICategory } from '../../../../../core/interfaces/icategory.interface';
+import { Component, OnInit, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { CatagoriesService } from '../../../../../shared/services/Categories/catagories.service';
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 
@@ -7,50 +7,43 @@ import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
   selector: 'app-categories-slider',
   imports: [CarouselModule],
   templateUrl: './categories-slider.component.html',
-  styleUrl: './categories-slider.component.css',
+  styleUrl: './categories-slider.component.css'
 })
-export class CategoriesSliderComponent {
-  constructor(private _CatagoriesService: CatagoriesService) {}
+export class CategoriesSliderComponent implements OnInit {
 
-  allCategories!: ICategory[];
+  private readonly _CatagoriesService = inject(CatagoriesService);
+  private readonly _Router = inject(Router);
+
+  allCategories: any[] = [];
 
   customOptions: OwlOptions = {
     loop: true,
     mouseDrag: true,
     touchDrag: true,
-    pullDrag: true,
+    pullDrag: false,
     dots: true,
+    autoplay: true,
+    autoplaySpeed: 1000,
     navSpeed: 700,
-    autoplay:true,
-    margin:10,
-    autoplaySpeed: 500 ,
-    // autoplayTimeout: 100 ,
-    autoplayHoverPause:true, 
     navText: ['', ''],
     responsive: {
-      0: {
-        items: 1,
-      },
-      400: {
-        items: 2,
-      },
-      740: {
-        items: 3,
-      },
-      940: {
-        items: 6,
-      },
+      0: { items: 2 },
+      400: { items: 3 },
+      740: { items: 4 },
+      940: { items: 6 }
     },
-    nav: false,
-  };
+    nav: false
+  }
 
   ngOnInit(): void {
     this._CatagoriesService.getAllCategories().subscribe({
       next: (res) => {
         this.allCategories = res.data;
-      },
-      error: (err) => {
-      },
+      }
     });
+  }
+
+  navigateToCategory(category: any): void {
+    this._Router.navigate(['/products'], { queryParams: { category: category.name } });
   }
 }

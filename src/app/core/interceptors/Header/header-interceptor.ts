@@ -6,16 +6,15 @@ export const headerInterceptor: HttpInterceptorFn = (req, next) => {
 
   let _CookieService = inject(CookieService)
 
-  // Req interceptor
-  /*
-  1- Hold url
-  2- header url TOKEN
-  
-  */ 
+  // Skip auth endpoints (signup, signin, forgot-password, reset-password)
+  if (req.url.includes('/auth/')) {
+    return next(req);
+  }
 
-  if(req.url.includes('cart') || req.url.includes('wishlist') || req.url.includes('orders')){
+  const token = _CookieService.get('token');
+  if (token) {
     req = req.clone({
-      setHeaders : {token : _CookieService.get('token')}
+      setHeaders: { token }
     })
   }
 

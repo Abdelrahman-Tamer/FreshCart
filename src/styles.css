@@ -55,6 +55,7 @@ body {
 .bg-main-light {
   background-color: var(--light-color) !important;
 }
+
 .btn-main {
   background-color: var(--main-color);
   padding: 7px 20px;
@@ -75,9 +76,119 @@ body {
   background-color: #11bd11;
 }
 
-.myToast{
-  border-radius: 1rem;
-  padding: 1rem;
-  font-weight: 900;
-  color: aliceblue;
+.main-btn {
+  width: 100%;
+  background-color: var(--main-color);
+  padding: 0.75rem 1rem;
+  border-radius: 0.5rem;
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.main-btn:hover {
+  background-color: #11bd11;
+}
+
+.main-btn:disabled {
+  cursor: not-allowed;
+  background-color: #d1d5db;
+}
+
+.main-btn:disabled:hover {
+  background-color: #d1d5db;
+}
+
+/* Toast notifications — consistent look & placement */
+.ngx-toastr {
+  border-radius: 1rem !important;
+  padding: 0.85rem 1.25rem !important;
+  font-weight: 700 !important;
+  font-size: 0.9rem !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  pointer-events: auto !important;
+  backdrop-filter: blur(12px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+}
+
+.ngx-toastr .toast-close-button {
+  font-size: 1.1rem !important;
+  opacity: 0.7 !important;
+  transition: opacity 0.2s !important;
+}
+
+.ngx-toastr .toast-close-button:hover {
+  opacity: 1 !important;
+}
+
+.ngx-toastr .toast-progress {
+  border-radius: 0 0 1rem 1rem !important;
+  height: 3px !important;
+  opacity: 0.6 !important;
+}
+
+/* Success toast */
+.ngx-toastr.toast-success {
+  background: linear-gradient(135deg, #0aad0a, #11bd11) !important;
+  color: #fff !important;
+}
+
+/* Error toast */
+.ngx-toastr.toast-error {
+  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  color: #fff !important;
+}
+
+/* Info toast */
+.ngx-toastr.toast-info {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  color: #fff !important;
+}
+
+/* Warning toast */
+.ngx-toastr.toast-warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  color: #fff !important;
+}
+
+/* Unified FreshCart toast placement and shape */
+.toast-container.toast-top-right {
+  position: fixed !important;
+  top: 1rem !important;
+  right: 1rem !important;
+  bottom: auto !important;
+  left: auto !important;
+  z-index: 999999 !important;
+  width: min(360px, calc(100vw - 2rem)) !important;
+}
+
+.toast-container .ngx-toastr.freshcart-toast {
+  width: 100% !important;
+  min-height: 56px !important;
+  margin: 0 0 0.75rem !important;
+  border-radius: 0.875rem !important;
+  padding: 0.85rem 1.1rem !important;
+  background-image: none !important;
+}
+
+.toast-container .ngx-toastr.freshcart-toast .toast-progress {
+  border-radius: 0 0 0.875rem 0.875rem !important;
+}
+
+.my-valid {
+  border-color: var(--main-color) !important;
+}
+
+.my-invalid {
+  border-color: #ef4444 !important;
+}
+
+.section-head {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937;
 }

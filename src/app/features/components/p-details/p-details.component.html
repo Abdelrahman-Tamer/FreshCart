@@ -1,42 +1,67 @@
-<section class="main-section">
+<section class="py-12 bg-gray-50 min-h-screen">
+  <div class="max-w-screen-2xl mx-auto px-4">
 
+    <!-- Loading State -->
+    @if (isLoading) {
+      <div class="flex justify-center items-center py-20">
+        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      </div>
+    }
 
-    <div class="container-auto">
+    <!-- Error State -->
+    @if (error && !isLoading) {
+      <div class="text-center py-20">
+        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
+          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <h3 class="text-lg font-semibold text-red-800 mb-2">Product Not Found</h3>
+          <p class="text-red-600 mb-4">{{ error }}</p>
+          <a routerLink="/products"
+            class="inline-block bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
+            Browse Products
+          </a>
+        </div>
+      </div>
+    }
 
+    <!-- Product Details -->
+    @if (!isLoading && !error && productDetails._id) {
+      <div class="flex items-center flex-wrap bg-white rounded-xl shadow-md p-6">
 
-        <div class="flex items-center flex-wrap">
-
-            <div class="w-full md:w-1/2 lg:w-1/4">
-                <owl-carousel-o [options]="customOptions">
-                    @for (img of productDetails.images; track $index) {
-                    <ng-template carouselSlide>
-                        <img [src]="img" alt="">
-                    </ng-template>
-                    }
-                </owl-carousel-o>
-            </div>
-
-            <div class="w-full p-2 md:w-1/2 lg:w-3/4">
-                <h1 class="text-4xl font-bold my-3"> {{productDetails.title}} </h1>
-                <p class="font-medium my-3"> {{productDetails.description}} </p>
-                <h3 class="my-3"> {{productDetails.category.name}} </h3>
-                <div class="flex justify-between items-center">
-                    <h2> {{productDetails.price}} </h2>
-                    <div class="">
-                        <i class="fas fa-star rating-color"></i>
-                        {{productDetails.ratingsAverage}}
-                    </div>
-                </div>
-
-
-                <button class="main-btn">Add to Cart+</button>
-            </div>
-
-
-
+        <!-- Product Images Carousel -->
+        <div class="w-full md:w-1/2 lg:w-1/4 p-4">
+          <owl-carousel-o [options]="customOptions">
+            @for (img of productDetails.images; track $index) {
+              <ng-template carouselSlide>
+                <img [src]="img" [alt]="productDetails.title" class="w-full h-64 object-contain">
+              </ng-template>
+            }
+          </owl-carousel-o>
         </div>
 
-    </div>
+        <!-- Product Info -->
+        <div class="w-full p-4 md:w-1/2 lg:w-3/4">
+          <h1 class="text-4xl font-bold my-3 text-gray-800">{{ productDetails.title }}</h1>
+          <p class="font-medium my-3 text-gray-600">{{ productDetails.description }}</p>
+          <h3 class="my-3 text-emerald-600 font-semibold">{{ productDetails.category.name }}</h3>
+          <div class="flex justify-between items-center my-3">
+            <h2 class="text-2xl font-bold text-emerald-600">
+              {{ productDetails.price | currency : 'EGP' : 'symbol' : '1.0-0' }}
+            </h2>
+            <div class="flex items-center">
+              <i class="fas fa-star text-yellow-400 mr-1"></i>
+              <span class="text-gray-700 font-medium">{{ productDetails.ratingsAverage }}</span>
+            </div>
+          </div>
+          <button (click)="addToCart(productDetails._id)"
+            class="bg-emerald-500 text-white px-8 py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 font-semibold">
+            Add to Cart +
+          </button>
+        </div>
 
+      </div>
+    }
 
+  </div>
 </section>

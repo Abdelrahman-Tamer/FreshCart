@@ -18,7 +18,7 @@ import { authGuard } from './core/guards/auth-guard';
 
 export const routes: Routes = [
 
-    { path: '', redirectTo: 'login', pathMatch: 'full' },
+    { path: '', loadComponent: () => import('./core/components/redirect/redirect.component').then((c) => c.RedirectComponent), pathMatch: 'full' },
 
     {
         path: '', component: AuthLayoutComponent, children: [
@@ -30,6 +30,9 @@ export const routes: Routes = [
 
     // Payment success route (no auth guard for Stripe return)
     { path: 'payment-success', component: PaymentSuccessComponent, title: 'Payment Success' },
+
+    // Unauthorized / access-denied page (no auth guard — always visible)
+    { path: 'not-found', component: NotfoundComponent, title: 'Access Denied' },
 
     {
         path: '', component: MainLayoutComponent, canActivate: [authGuard], children: [
