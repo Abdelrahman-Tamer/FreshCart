@@ -1,55 +1,52 @@
-<section class="notfound-wrapper">
-  <div class="notfound-card text-center p-10 sm:p-12 max-w-sm w-full rounded-3xl" role="alert"
-    aria-labelledby="notfound-heading" aria-describedby="notfound-message">
-
-    <div class="mb-8">
-      <img src="./images/freshcart-logo.svg" alt="FreshCart logo" class="h-10 mx-auto" loading="lazy">
+<section class="min-h-[calc(100vh-140px)] flex items-center justify-center py-16 px-4 sm:px-6 bg-neutral-50/60">
+  <div class="w-full max-w-md text-center bg-white rounded-2xl border border-neutral-200/80 shadow-sm p-8 sm:p-10" role="alert">
+    
+    <!-- Illustration / Badge -->
+    <div class="mb-6">
+      <div class="w-20 h-20 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto ring-8 ring-emerald-50/50">
+        @if (isAuthFailure) {
+          <svg class="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        } @else {
+          <span class="text-3xl font-black text-emerald-700 tracking-tighter">404</span>
+        }
+      </div>
     </div>
 
-    <div class="mb-8">
-      <img src="./images/error.svg" alt="" aria-hidden="true" class="w-24 h-24 mx-auto opacity-70" loading="lazy">
-    </div>
-
-    <h1 id="notfound-heading" class="text-2xl sm:text-6xl font-black text-red-600 leading-none tracking-tight mb-2">
-      {{ heading }}
+    <h1 class="text-2xl font-bold text-neutral-900 mb-2 tracking-tight">
+      {{ title }}
     </h1>
 
-    <h2 class="text-xl font-bold text-gray-900 mb-3">
-      {{ title }}
-    </h2>
-
-    <p id="notfound-message" class="text-gray-500 mb-8 leading-relaxed">
+    <p class="text-xs sm:text-sm text-neutral-500 mb-8 max-w-xs mx-auto leading-relaxed">
       {{ message }}
     </p>
 
+    <!-- Buttons -->
     <div class="flex flex-col sm:flex-row gap-3 justify-center">
       @if (isAuthFailure) {
-      <button type="button" routerLink="/login" aria-label="Go to login page"
-        class="btn-primary inline-flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold text-base border-none cursor-pointer transition-all duration-200 hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-200">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-        </svg>
-        <span>Login</span>
-      </button>
+        <a routerLink="/login" class="btn-primary py-2.5 px-5 justify-center text-xs shadow-sm">
+          <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+          </svg>
+          Sign In
+        </a>
       } @else {
-      <button type="button" routerLink="/home" aria-label="Go to home page"
-        class="btn-primary inline-flex items-center justify-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-semibold text-base border-none cursor-pointer transition-all duration-200 hover:bg-emerald-600 focus:outline-none focus:ring-4 focus:ring-emerald-200">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-        </svg>
-        <span>Go Home</span>
-      </button>
+        <a routerLink="/home" class="btn-primary py-2.5 px-5 justify-center text-xs shadow-sm">
+          <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+          </svg>
+          Back to Homepage
+        </a>
       }
 
-      <button type="button" (click)="goBack()" aria-label="Go back to previous page"
-        class="btn-secondary inline-flex items-center justify-center gap-2 bg-white text-gray-700 px-6 py-3 rounded-xl font-semibold text-base border border-gray-300 cursor-pointer transition-all duration-200 hover:bg-gray-50 hover:border-gray-400 focus:outline-none focus:ring-4 focus:ring-gray-200">
-        <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+      <button type="button" (click)="goBack()" class="btn-outline py-2.5 px-5 justify-center text-xs">
+        <svg class="w-4 h-4 me-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
         </svg>
-        <span>Go Back</span>
+        Go Back
       </button>
     </div>
+
   </div>
 </section>

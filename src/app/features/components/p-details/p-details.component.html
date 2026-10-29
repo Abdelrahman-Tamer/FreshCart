@@ -1,67 +1,196 @@
-<section class="py-12 bg-gray-50 min-h-screen">
-  <div class="max-w-screen-2xl mx-auto px-4">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10" aria-label="Product Details">
 
-    <!-- Loading State -->
-    @if (isLoading) {
-      <div class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
-      </div>
+  <!-- Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs text-slate-500 mb-8" aria-label="Breadcrumb">
+    <a routerLink="/home" class="hover:text-emerald-600 transition-colors">Home</a>
+    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+    <a routerLink="/products" class="hover:text-emerald-600 transition-colors">Products</a>
+    @if (productDetails.category.name) {
+      <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+      <a [routerLink]="['/products']" [queryParams]="{ category: productDetails.category.name }" class="hover:text-emerald-600 transition-colors">
+        {{ productDetails.category.name }}
+      </a>
     }
+    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+    <span class="text-slate-800 font-semibold truncate max-w-[200px] sm:max-w-xs">{{ productDetails.title }}</span>
+  </nav>
 
-    <!-- Error State -->
-    @if (error && !isLoading) {
-      <div class="text-center py-20">
-        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
-          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="text-lg font-semibold text-red-800 mb-2">Product Not Found</h3>
-          <p class="text-red-600 mb-4">{{ error }}</p>
-          <a routerLink="/products"
-            class="inline-block bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
-            Browse Products
-          </a>
+  <!-- Loading State -->
+  @if (isLoading) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 bg-white rounded-2xl p-6 sm:p-10 border border-slate-200/80 animate-pulse">
+      <div class="aspect-square bg-slate-100 rounded-2xl"></div>
+      <div class="space-y-4">
+        <div class="h-4 bg-slate-100 rounded-md w-1/4"></div>
+        <div class="h-8 bg-slate-100 rounded-md w-3/4"></div>
+        <div class="h-4 bg-slate-100 rounded-md w-1/3"></div>
+        <div class="h-6 bg-slate-100 rounded-md w-1/4"></div>
+        <div class="h-24 bg-slate-100 rounded-xl w-full"></div>
+        <div class="h-12 bg-slate-100 rounded-xl w-1/2"></div>
+      </div>
+    </div>
+  }
+
+  <!-- Error State -->
+  @if (error && !isLoading) {
+    <div class="text-center py-16 bg-white rounded-2xl border border-red-200 p-8 max-w-md mx-auto">
+      <svg class="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      </svg>
+      <h3 class="text-base font-bold text-slate-800 mb-1">Product Not Found</h3>
+      <p class="text-xs text-slate-500 mb-4">{{ error }}</p>
+      <a routerLink="/products" class="btn-primary text-xs px-5 py-2.5">
+        Back to Products
+      </a>
+    </div>
+  }
+
+  <!-- Product Showcase -->
+  @if (!isLoading && !error && productDetails._id) {
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-14 bg-white rounded-2xl p-6 sm:p-10 border border-slate-200/80 shadow-xs">
+
+      <!-- Gallery Column -->
+      <div class="flex flex-col gap-4">
+        <!-- Main Image -->
+        <div class="w-full aspect-square bg-slate-50 border border-slate-200/80 rounded-2xl flex items-center justify-center p-6 relative overflow-hidden group">
+          <img [src]="activeImage" [alt]="productDetails.title"
+            class="max-h-full max-w-full object-contain transition-transform duration-300 group-hover:scale-105">
+          @if (productDetails.price) {
+            <span class="absolute top-4 left-4 bg-emerald-600 text-white text-xs font-bold px-2.5 py-1 rounded-full shadow-xs">
+              In Stock
+            </span>
+          }
         </div>
-      </div>
-    }
 
-    <!-- Product Details -->
-    @if (!isLoading && !error && productDetails._id) {
-      <div class="flex items-center flex-wrap bg-white rounded-xl shadow-md p-6">
-
-        <!-- Product Images Carousel -->
-        <div class="w-full md:w-1/2 lg:w-1/4 p-4">
-          <owl-carousel-o [options]="customOptions">
+        <!-- Thumbnails List -->
+        @if (productDetails.images && productDetails.images.length > 1) {
+          <div class="flex items-center gap-3 overflow-x-auto py-2">
             @for (img of productDetails.images; track $index) {
-              <ng-template carouselSlide>
-                <img [src]="img" [alt]="productDetails.title" class="w-full h-64 object-contain">
-              </ng-template>
+              <button (click)="setActiveImage(img)"
+                [class.border-emerald-600]="activeImage === img"
+                [class.ring-2]="activeImage === img"
+                [class.ring-emerald-500/20]="activeImage === img"
+                class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-slate-200 bg-slate-50 p-1.5 flex items-center justify-center shrink-0 cursor-pointer hover:border-slate-400 transition-all">
+                <img [src]="img" [alt]="productDetails.title" class="w-full h-full object-contain">
+              </button>
             }
-          </owl-carousel-o>
+          </div>
+        }
+      </div>
+
+      <!-- Information & Purchase Column -->
+      <div class="flex flex-col">
+
+        <!-- Category & Brand Info -->
+        <div class="flex items-center gap-2 mb-2">
+          <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-md">
+            {{ productDetails.category.name }}
+          </span>
+          @if (productDetails.brand.name) {
+            <span class="text-xs font-medium text-slate-500">
+              Brand: <strong class="text-slate-700">{{ productDetails.brand.name }}</strong>
+            </span>
+          }
         </div>
 
-        <!-- Product Info -->
-        <div class="w-full p-4 md:w-1/2 lg:w-3/4">
-          <h1 class="text-4xl font-bold my-3 text-gray-800">{{ productDetails.title }}</h1>
-          <p class="font-medium my-3 text-gray-600">{{ productDetails.description }}</p>
-          <h3 class="my-3 text-emerald-600 font-semibold">{{ productDetails.category.name }}</h3>
-          <div class="flex justify-between items-center my-3">
-            <h2 class="text-2xl font-bold text-emerald-600">
-              {{ productDetails.price | currency : 'EGP' : 'symbol' : '1.0-0' }}
-            </h2>
-            <div class="flex items-center">
-              <i class="fas fa-star text-yellow-400 mr-1"></i>
-              <span class="text-gray-700 font-medium">{{ productDetails.ratingsAverage }}</span>
+        <!-- Title -->
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-snug mb-3">
+          {{ productDetails.title }}
+        </h1>
+
+        <!-- Rating & Review Count -->
+        <div class="flex items-center gap-3 mb-6">
+          <div class="flex items-center gap-1.5 text-xs font-bold text-slate-800 bg-amber-50 px-2.5 py-1 rounded-lg">
+            <svg class="w-4 h-4 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+            </svg>
+            <span>{{ productDetails.ratingsAverage }}</span>
+          </div>
+          <span class="text-xs text-slate-400">•</span>
+          <span class="text-xs text-slate-500">{{ productDetails.ratingsQuantity || 0 }} verified customer ratings</span>
+        </div>
+
+        <!-- Pricing Block -->
+        <div class="flex items-baseline gap-2 mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100">
+          <span class="text-3xl sm:text-4xl font-extrabold text-slate-900">{{ productDetails.price }}</span>
+          <span class="text-sm font-bold text-slate-500 uppercase">EGP</span>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-8">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2">Description</h2>
+          <p class="text-sm text-slate-600 leading-relaxed">
+            {{ productDetails.description }}
+          </p>
+        </div>
+
+        <!-- Actions: Quantity + Add to Cart + Wishlist -->
+        <div class="mt-auto pt-6 border-t border-slate-200">
+          <div class="flex items-center gap-3 sm:gap-4 mb-6">
+            <!-- Add to Cart Primary Button -->
+            <button (click)="addToCart(productDetails._id)" [disabled]="isAddingToCart"
+              class="flex-1 btn-primary py-3.5 rounded-xl font-bold text-sm sm:text-base flex items-center justify-center gap-2 shadow-sm">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.669 0-1.188-.578-1.119-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.119 1.007zM8.625 10.5a.375.375 0 11-.75 0 .375.375 0 01.75 0zm7.5 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+              <span>{{ isAddingToCart ? 'Adding to Cart...' : 'Add to Cart' }}</span>
+            </button>
+
+            <!-- Wishlist Heart Button -->
+            <button (click)="toggleWishlist(productDetails._id)"
+              [class.bg-red-50]="isInWishlist(productDetails._id)"
+              [class.border-red-200]="isInWishlist(productDetails._id)"
+              class="p-3.5 rounded-xl border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+              [attr.aria-label]="isInWishlist(productDetails._id) ? 'Remove from wishlist' : 'Save to wishlist'">
+              @if (isInWishlist(productDetails._id)) {
+                <svg class="w-6 h-6 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                  <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                </svg>
+              } @else {
+                <svg class="w-6 h-6 text-slate-400 hover:text-red-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                </svg>
+              }
+            </button>
+          </div>
+
+          <!-- Features & Payment Support -->
+          <div class="grid grid-cols-2 gap-3 text-xs text-slate-600 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
+              </svg>
+              <span>Cash on delivery available</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+              </svg>
+              <span>Stripe online card payment</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+              </svg>
+              <span>Verified customer ratings</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-600 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+              </svg>
+              <span>Instant wishlist saving</span>
             </div>
           </div>
-          <button (click)="addToCart(productDetails._id)"
-            class="bg-emerald-500 text-white px-8 py-3 rounded-lg hover:bg-emerald-600 transition-colors duration-300 font-semibold">
-            Add to Cart +
-          </button>
         </div>
 
       </div>
-    }
 
-  </div>
+    </div>
+  }
+
 </section>

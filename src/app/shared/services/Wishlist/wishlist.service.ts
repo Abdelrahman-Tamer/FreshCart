@@ -1,101 +1,108 @@
 import { HttpClient } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { inject, Injectable, signal, computed, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environment } from '../../../../environments/environment';
+import { CookieService } from 'ngx-cookie-service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class WishlistService {
-
   private readonly _HttpClient = inject(HttpClient);
+  private readonly _CookieService = inject(CookieService);
+  private readonly platformId = inject(PLATFORM_ID);
 
-  // BehaviorSubject to track wishlist items
-  private wishlistItems = new BehaviorSubject<string[]>([]);
-  wishlistItems$ = this.wishlistItems.asObservable();
+  // Modern Angular signals for instant reactivity
+  readonly wishlistIds = signal<Set<string>>(new Set());
+  readonly wishlistCount = computed(() => this.wishlistIds().size);
 
-  // Getter for current value
-  get currentWishlist(): string[] {
-    return this.wishlistItems.value;
-  }
+  // BehaviorSubject for backwards compatibility with legacy observables
+  private wishlistItemsSubject = new BehaviorSubject<string[]>([]);
+  readonly wishlistItems$ = this.wishlistItemsSubject.asObservable();
 
   constructor() {
-    // Load wishlist from localStorage on service initialization
-    if (typeof window !== 'undefined' && window.localStorage) {
-      const savedWishlist = localStorage.getItem('wishlist');
-      if (savedWishlist) {
-        this.wishlistItems.next(JSON.parse(savedWishlist));
-      }
+    if (isPlatformBrowser(this.platformId) && this._CookieService.get('token')) {
+      this.refreshWishlist();
     }
   }
 
-  // Add product to wishlist
-  addToWishlist(productId: string): Observable<any> {
-    return this._HttpClient.patch(`${environment.baseURL}/api/v1/wishlist`, {
-      productId: productId
+  refreshWishlist(): void {
+    if (!isPlatformBrowser(this.platformId) || !this._CookieService.get('token')) {
+      this.resetState();
+      return;
+    }
+    this.getUserWishlist().subscribe({
+      next: (res) => {
+        if (res?.data) {
+          const ids = new Set<string>(res.data.map((item: any) => item._id || item.id));
+          this.wishlistIds.set(ids);
+          this.wishlistItemsSubject.next(Array.from(ids));
+        }
+      },
+      error: () => {
+        this.resetState();
+      }
     });
   }
 
-  // Remove product from wishlist
-  removeFromWishlist(productId: string): Observable<any> {
-    return this._HttpClient.delete(`${environment.baseURL}/api/v1/wishlist/${productId}`);
+  resetState(): void {
+    this.wishlistIds.set(new Set());
+    this.wishlistItemsSubject.next([]);
   }
 
-  // Get user's wishlist
   getUserWishlist(): Observable<any> {
-    // For now, return local wishlist since API endpoint is not available
-    return new Observable(observer => {
-      const localWishlist = this.wishlistItems.value;
-      observer.next({
-        success: true,
-        data: localWishlist.map(id => ({ _id: id }))
-      });
-      observer.complete();
-    });
+    return this._HttpClient.get(`${environment.baseURL}/api/v1/wishlist`).pipe(
+      tap((res: any) => {
+        if (res?.data) {
+          const ids = new Set<string>(res.data.map((item: any) => item._id || item.id));
+          this.wishlistIds.set(ids);
+          this.wishlistItemsSubject.next(Array.from(ids));
+        }
+      })
+    );
   }
 
-  // Local methods for UI state management
-  addToLocalWishlist(productId: string) {
-    const currentWishlist = this.currentWishlist;
-    if (!currentWishlist.includes(productId)) {
-      const updatedWishlist = [...currentWishlist, productId];
-      this.wishlistItems.next(updatedWishlist);
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-      }
-    }
+  addToWishlist(productId: string): Observable<any> {
+    return this._HttpClient.post(`${environment.baseURL}/api/v1/wishlist`, { productId }).pipe(
+      tap((res: any) => {
+        const idList: string[] = res?.data || [...Array.from(this.wishlistIds()), productId];
+        this.wishlistIds.set(new Set(idList));
+        this.wishlistItemsSubject.next(idList);
+      })
+    );
   }
 
-  removeFromLocalWishlist(productId: string) {
-    const currentWishlist = this.currentWishlist;
-    const updatedWishlist = currentWishlist.filter(id => id !== productId);
-    this.wishlistItems.next(updatedWishlist);
-    if (typeof window !== 'undefined' && window.localStorage) {
-      localStorage.setItem('wishlist', JSON.stringify(updatedWishlist));
-    }
+  removeFromWishlist(productId: string): Observable<any> {
+    return this._HttpClient.delete(`${environment.baseURL}/api/v1/wishlist/${productId}`).pipe(
+      tap((res: any) => {
+        const idList: string[] = res?.data || Array.from(this.wishlistIds()).filter(id => id !== productId);
+        this.wishlistIds.set(new Set(idList));
+        this.wishlistItemsSubject.next(idList);
+      })
+    );
   }
 
   isInWishlist(productId: string): boolean {
-    return this.currentWishlist.includes(productId);
+    return this.wishlistIds().has(productId);
   }
 
-  getWishlistCount(): number {
-    return this.currentWishlist.length;
+  // Backward-compatible helper methods
+  get currentWishlist(): string[] {
+    return Array.from(this.wishlistIds());
   }
 
-  // Toggle wishlist item (add if not exists, remove if exists)
-  toggleWishlistItem(productId: string): Observable<any> {
-    // For now, just use local storage since API endpoints are not available
-    if (this.isInWishlist(productId)) {
-      this.removeFromLocalWishlist(productId);
-    } else {
-      this.addToLocalWishlist(productId);
-    }
+  addToLocalWishlist(productId: string) {
+    const updated = new Set(this.wishlistIds());
+    updated.add(productId);
+    this.wishlistIds.set(updated);
+    this.wishlistItemsSubject.next(Array.from(updated));
+  }
 
-    // Return a mock observable that always succeeds
-    return new Observable(observer => {
-      observer.next({ success: true, message: 'Wishlist updated' });
-      observer.complete();
-    });
+  removeFromLocalWishlist(productId: string) {
+    const updated = new Set(this.wishlistIds());
+    updated.delete(productId);
+    this.wishlistIds.set(updated);
+    this.wishlistItemsSubject.next(Array.from(updated));
   }
 }

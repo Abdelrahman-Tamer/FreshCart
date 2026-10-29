@@ -1,33 +1,63 @@
 <!-- Categories Section -->
-<section class="py-12 bg-white">
-  <div class="container mx-auto px-4">
+<section class="py-8 bg-neutral-50/50 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     
+    <!-- Breadcrumbs -->
+    <nav class="flex items-center gap-2 text-xs text-neutral-500 mb-6">
+      <a routerLink="/home" class="hover:text-emerald-600 transition-colors">Home</a>
+      <span>/</span>
+      <span class="text-neutral-900 font-medium">Categories</span>
+    </nav>
+
     <!-- Section Header -->
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">Shop by Category</h1>
-      <p class="text-gray-600 text-lg">Explore our wide range of product categories</p>
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8 pb-4 border-b border-neutral-200/80">
+      <div>
+        <div class="flex items-center gap-2.5">
+          <h1 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight">Shop by Category</h1>
+          @if (!isLoading && allCategories.length > 0) {
+            <span class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-2.5 py-0.5 rounded-full border border-emerald-200">
+              {{ allCategories.length }} categories
+            </span>
+          }
+        </div>
+        <p class="text-sm text-neutral-500 mt-1">Browse our carefully curated departments and essential groceries</p>
+      </div>
+
+      <!-- Quick Link to All Products -->
+      <a routerLink="/products" class="btn-outline text-xs py-2 px-3 self-start md:self-auto inline-flex items-center gap-1.5">
+        <span>View all products</span>
+        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+        </svg>
+      </a>
     </div>
 
-    <!-- Loading State -->
+    <!-- Loading Skeleton State -->
     @if (isLoading) {
-      <div class="flex justify-center items-center py-20">
-        <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
+        @for (i of [1,2,3,4,5,6,7,8,9,10,11,12]; track i) {
+          <div class="bg-white rounded-2xl border border-neutral-200/70 p-4 flex flex-col items-center animate-pulse">
+            <div class="w-24 h-24 rounded-full bg-neutral-200 mb-3"></div>
+            <div class="h-4 bg-neutral-200 rounded w-3/4 mb-2"></div>
+            <div class="h-3 bg-neutral-150 rounded w-1/2"></div>
+          </div>
+        }
       </div>
     }
 
     <!-- Error State -->
     @if (error && !isLoading) {
-      <div class="text-center py-20">
-        <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
-          <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-          </svg>
-          <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
-          <p class="text-red-600 mb-4">{{ error }}</p>
-          <button 
-            (click)="getAllCategories()" 
-            class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
-            Try Again
+      <div class="text-center py-16">
+        <div class="bg-white border border-red-200 rounded-2xl p-8 max-w-md mx-auto shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-red-100 text-red-600 flex items-center justify-center mx-auto mb-3">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+            </svg>
+          </div>
+          <h3 class="text-base font-bold text-neutral-900 mb-1">Failed to load categories</h3>
+          <p class="text-xs text-neutral-500 mb-4">{{ error }}</p>
+          <button (click)="getAllCategories()" class="btn-primary text-xs py-2 px-4 mx-auto">
+            Try again
           </button>
         </div>
       </div>
@@ -35,62 +65,47 @@
 
     <!-- Categories Grid -->
     @if (!isLoading && !error && allCategories.length > 0) {
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-6">
+      <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 sm:gap-6">
         @for (category of allCategories; track category._id) {
-          <div class="group cursor-pointer" (click)="navigateToCategory(category)">
-            <div class="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-gray-100 transform hover:-translate-y-2">
+          <div 
+            class="group bg-white rounded-2xl border border-neutral-200/80 hover:border-emerald-500/50 hover:shadow-md transition-all duration-300 overflow-hidden cursor-pointer flex flex-col items-center text-center p-4 hover:-translate-y-1"
+            (click)="navigateToCategory(category)"
+            role="button"
+            tabindex="0"
+            (keydown.enter)="navigateToCategory(category)"
+          >
+            <!-- Image Circle / Container -->
+            <div class="relative w-28 h-28 sm:w-32 sm:h-32 rounded-full overflow-hidden bg-neutral-100 mb-3.5 border border-neutral-150 group-hover:border-emerald-400 transition-colors">
+              <img 
+                [src]="category.image" 
+                [alt]="category.name"
+                [attr.data-category-id]="category._id" 
+                class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                (error)="onImageError($event)"
+                loading="lazy"
+              >
               
-              <!-- Category Image -->
-              <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 h-48">
-                <img 
-                  [src]="category.image" 
-                  [alt]="category.name"
-                  [attr.data-category-id]="category._id" 
-                  class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  (error)="onImageError($event)"
-                  loading="lazy">
-                
-                <!-- Image overlay -->
-                <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                
-                <!-- Category Badge -->
-                <div class="absolute top-3 right-3 bg-emerald-500 text-white text-xs font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  {{ category.name }}
+              <!-- Fallback placeholder if image broken -->
+              @if (isImageError(category._id)) {
+                <div class="absolute inset-0 flex items-center justify-center bg-neutral-100 text-neutral-400">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                  </svg>
                 </div>
-
-                <!-- Fallback placeholder -->
-                @if (isImageError(category._id)) {
-                  <div class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400">
-                    <div class="text-center">
-                      <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                      </svg>
-                      <p class="text-xs font-medium">Category</p>
-                    </div>
-                  </div>
-                }
-              </div>
-
-              <!-- Category Info -->
-              <div class="p-4 text-center">
-                <h3 class="text-lg font-bold text-gray-800 group-hover:text-emerald-600 transition-colors duration-300 mb-2">
-                  {{ category.name }}
-                </h3>
-                <p class="text-sm text-gray-500 mb-3">
-                  {{ category.name }} products
-                </p>
-                
-                <!-- View Products Button -->
-                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <span class="inline-flex items-center text-emerald-600 font-medium text-sm">
-                    View Products
-                    <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path>
-                    </svg>
-                  </span>
-                </div>
-              </div>
+              }
             </div>
+
+            <!-- Category Title -->
+            <h3 class="text-sm font-bold text-neutral-800 group-hover:text-emerald-700 transition-colors line-clamp-1 mb-1">
+              {{ category.name }}
+            </h3>
+            
+            <span class="text-xs text-neutral-400 group-hover:text-emerald-600 transition-colors flex items-center gap-1 font-medium">
+              Explore
+              <svg class="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </span>
           </div>
         }
       </div>
@@ -98,15 +113,17 @@
 
     <!-- Empty State -->
     @if (!isLoading && !error && allCategories.length === 0) {
-      <div class="text-center py-20">
-        <div class="bg-gray-50 border border-gray-200 rounded-xl p-8 max-w-md mx-auto">
-          <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+      <div class="text-center py-16">
+        <div class="bg-white border border-neutral-200 rounded-2xl p-8 max-w-md mx-auto">
+          <svg class="w-12 h-12 text-neutral-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
           </svg>
-          <h3 class="text-lg font-semibold text-gray-800 mb-2">No Categories Found</h3>
-          <p class="text-gray-600">There are no categories available at the moment.</p>
+          <h3 class="text-base font-bold text-neutral-800 mb-1">No Categories Found</h3>
+          <p class="text-xs text-neutral-500 mb-4">There are currently no product categories available.</p>
+          <button (click)="getAllCategories()" class="btn-primary text-xs py-2 px-4 mx-auto">Refresh</button>
         </div>
       </div>
     }
+
   </div>
 </section>

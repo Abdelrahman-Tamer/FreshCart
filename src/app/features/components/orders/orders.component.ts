@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PaymentService } from '../../../shared/services/Payment/payment.service';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
+import { CartService } from '../../../shared/services/Cart/cart.service';
 
 @Component({
   selector: 'app-orders',
@@ -15,12 +16,14 @@ export class OrdersComponent implements OnInit {
 
   private readonly _PaymentService = inject(PaymentService);
   private readonly _AuthService = inject(AuthService);
+  private readonly _CartService = inject(CartService);
 
   orders: any[] = [];
   isLoading: boolean = true;
   error: string | null = null;
 
   ngOnInit(): void {
+    this._CartService.refreshCart();
     this.loadUserOrders();
   }
 

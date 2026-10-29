@@ -32,7 +32,7 @@ export class CheckoutComponent implements OnInit {
 
   checkoutForm: FormGroup = this._FormBuilder.group({
     details: [null, [Validators.required, Validators.minLength(10)]],
-    phone: [null, [Validators.required, Validators.pattern(/^01[0125][0-9]{8}$/)]],
+    phone: [null, [Validators.required, Validators.pattern(/^(\+2)?01[0125][0-9]{8}$/)]],
     city: [null, [Validators.required, Validators.minLength(2)]]
   });
 
@@ -67,55 +67,40 @@ export class CheckoutComponent implements OnInit {
   }
 
   processOrder() {
-    if (this.checkoutForm.valid && this.cartData) {
+    if (this.checkoutForm.valid && this.cartData && !this.isProcessingPayment) {
       this.isProcessingPayment = true;
       const shippingAddress = this.checkoutForm.value;
 
       if (this.paymentMethod === 'cash') {
-        // Process cash order
+        // Process cash on delivery order
         this._PaymentService.createCashOrder(this.cartData._id, shippingAddress).subscribe({
           next: (res) => {
             this.isProcessingPayment = false;
+            this._CartService.resetState();
             this._ToastrService.success('Order placed successfully!', 'Success');
             this._Router.navigate(['/orders']);
           },
           error: (err) => {
             this.isProcessingPayment = false;
             this._ToastrService.error('Failed to place order', 'Error');
-            console.log(err);
+            console.error('Cash order error:', err);
           }
         });
       } else {
-        // Process online payment
+        // Process online payment via Stripe
         const baseUrl = this.baseUrl;
-        
         const requestBody = {
-          shippingAddress,
-          // Force the correct return URLs for Stripe
-          success_url: `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-          cancel_url: `${baseUrl}/home`,
-          // Alternative naming (some APIs use different names)
-          successUrl: `${baseUrl}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
-          cancelUrl: `${baseUrl}/home`
+          shippingAddress
         };
 
-        // Prepare request body with return URLs
-
-        this._PaymentService.createOnlinePaymentSession(this.cartData._id, requestBody).subscribe({
+        this._PaymentService.createOnlinePaymentSession(this.cartData._id, requestBody, baseUrl).subscribe({
           next: (res: any) => {
             this.isProcessingPayment = false;
             
-            // Redirect to Stripe checkout - handle different response formats
-            let stripeUrl = null;
-            
+            // Extract Stripe Checkout URL
+            let stripeUrl: string | null = null;
             if (res.session && res.session.url) {
               stripeUrl = res.session.url;
-              // Store session info
-              localStorage.setItem('checkout_session', JSON.stringify({
-                sessionId: res.session.id,
-                cartId: this.cartData._id,
-                timestamp: new Date().getTime()
-              }));
             } else if (res.url) {
               stripeUrl = res.url;
             } else if (res.data && res.data.url) {
@@ -128,24 +113,23 @@ export class CheckoutComponent implements OnInit {
                 closeButton: true
               });
               
-              
-              // Small delay to show the message then redirect
               setTimeout(() => {
-                window.location.href = stripeUrl;
-              }, 1500);
+                window.location.href = stripeUrl!;
+              }, 1000);
             } else {
               console.error('No redirect URL in response:', res);
-              this._ToastrService.error('Payment session failed - no redirect URL', 'Error');
+              this._ToastrService.error('Payment session failed - no redirect URL received', 'Error');
             }
           },
           error: (err) => {
             this.isProcessingPayment = false;
             this._ToastrService.error('Failed to create payment session', 'Error');
+            console.error('Payment session error:', err);
           }
         });
       }
     } else {
-      // Mark all fields as touched to show validation errors
+      // Mark all fields as touched to display validation errors
       Object.keys(this.checkoutForm.controls).forEach(key => {
         this.checkoutForm.get(key)?.markAsTouched();
       });

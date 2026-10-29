@@ -1,271 +1,307 @@
-<!-- Products Section -->
-<section class="py-12 bg-gradient-to-br from-gray-50 to-gray-100">
-  <div class="container mx-auto px-4">
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8" aria-label="Products Catalog">
 
-    <!-- Section Header -->
-    <div class="text-center mb-10">
-      <h1 class="text-4xl font-bold text-gray-800 mb-4">
-        @if (selectedCategory && selectedBrand) {
-        {{ selectedBrand }} {{ selectedCategory }} Products
-        } @else if (selectedCategory) {
-        {{ selectedCategory }} Products
+  <!-- Breadcrumbs -->
+  <nav class="flex items-center gap-2 text-xs text-slate-500 mb-6" aria-label="Breadcrumb">
+    <a routerLink="/home" class="hover:text-emerald-600 transition-colors">Home</a>
+    <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+    <span class="text-slate-800 font-semibold">Products</span>
+    @if (selectedCategory) {
+      <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+      </svg>
+      <span class="text-emerald-700 font-semibold">{{ selectedCategory }}</span>
+    }
+  </nav>
+
+  <!-- Page Header & Mobile Filter Trigger -->
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-200">
+    <div>
+      <h1 class="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+        @if (selectedCategory) {
+          {{ selectedCategory }}
         } @else if (selectedBrand) {
-        {{ selectedBrand }} Products
+          {{ selectedBrand }} Products
         } @else {
-        All Products
+          All Products
         }
       </h1>
-      <p class="text-gray-600 text-lg">
-        @if (selectedCategory && selectedBrand) {
-        Discover our {{ selectedBrand }} {{ selectedCategory.toLowerCase() }} collection
-        } @else if (selectedCategory) {
-        Discover our {{ selectedCategory.toLowerCase() }} collection
-        } @else if (selectedBrand) {
-        Explore our {{ selectedBrand }} product range
-        } @else {
-        Explore our complete product catalog
-        }
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">
+        Showing <strong class="text-slate-800">{{ getFilteredProducts().length }}</strong> items matching your criteria
       </p>
     </div>
 
-    @if (products.length > 0) {
-    <!-- Search and Filters -->
-    <div class="max-w-4xl mx-auto mb-10">
-
-      <!-- Search Bar -->
-      <div class="max-w-md mx-auto mb-6">
-        <div class="relative">
-          <input [(ngModel)]="fromInput" type="text" placeholder="Search products..."
-            class="w-full pl-12 pr-4 py-4 bg-white border border-gray-200 rounded-2xl shadow-lg focus:outline-none focus:ring-4 focus:ring-emerald-500/20 focus:border-emerald-500 transition-all duration-300">
-          <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-            </svg>
-          </div>
-        </div>
-      </div>
-
-      <!-- Filters -->
-      <div class="flex flex-wrap justify-center gap-4 mb-6">
-
-        <!-- Category Filter -->
-        <div class="flex items-center space-x-2">
-          <label class="text-sm font-medium text-gray-700">Category:</label>
-          <select [(ngModel)]="selectedCategory" (ngModelChange)="onFilterChange()"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
-            <option value="">All Categories</option>
-            @for (category of getUniqueCategories(); track category) {
-            <option [value]="category">{{ category }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Brand Filter -->
-        <div class="flex items-center space-x-2">
-          <label class="text-sm font-medium text-gray-700">Brand:</label>
-          <select [(ngModel)]="selectedBrand" (ngModelChange)="onFilterChange()"
-            class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
-            <option value="">All Brands</option>
-            @for (brand of getUniqueBrands(); track brand) {
-            <option [value]="brand">{{ brand }}</option>
-            }
-          </select>
-        </div>
-
-        <!-- Sort Filter -->
-        <div class="flex items-center space-x-2">
-          <label class="text-sm font-medium text-gray-700">Sort by:</label>
-          <select [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
-            class="px-5 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300">
-            <option value="name">Name</option>
-            <option value="price">Price</option>
-            <option value="rating">Rating</option>
-          </select>
-        </div>
-
-        <!-- Clear Filters -->
-        @if (selectedCategory || selectedBrand || fromInput) {
-        <button (click)="selectedCategory = ''; selectedBrand = ''; fromInput = ''; onFilterChange()"
-          class="px-4 py-2 bg-gray-500 text-white rounded-lg hover:bg-gray-600 transition-colors duration-300">
-          Clear Filters
-        </button>
-        }
-      </div>
-
-      <!-- Results Count -->
-      <div class="text-center text-gray-600 mb-6">
-        Showing {{ (getFilteredProducts() | search : fromInput).length }} products
-        @if (selectedCategory) {
-        in {{ selectedCategory }}
-        }
-      </div>
-    </div>
-    }
-
-    <!-- Loading State -->
-    @if (isLoading) {
-    <div class="flex justify-center items-center py-20">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-emerald-500"></div>
-    </div>
-    }
-
-    <!-- Error State -->
-    @if (error && !isLoading) {
-    <div class="text-center py-20">
-      <div class="bg-red-50 border border-red-200 rounded-xl p-8 max-w-md mx-auto">
-        <svg class="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+    <!-- Mobile Filter Toggle & Quick Sort Dropdown -->
+    <div class="flex items-center gap-3">
+      <!-- Mobile Filter Button -->
+      <button (click)="isFilterDrawerOpen = !isFilterDrawerOpen"
+        class="lg:hidden flex items-center gap-2 px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 shadow-2xs">
+        <svg class="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75" />
         </svg>
-        <h3 class="text-lg font-semibold text-red-800 mb-2">Oops! Something went wrong</h3>
-        <p class="text-red-600 mb-4">{{ error }}</p>
-        <button (click)="loadProducts()"
-          class="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors duration-300">
-          Try Again
-        </button>
+        <span>Filters</span>
+      </button>
+
+      <!-- Sort By Dropdown -->
+      <div class="flex items-center gap-2">
+        <label for="sortDropdown" class="text-xs font-medium text-slate-500 hidden sm:inline">Sort by:</label>
+        <select id="sortDropdown" [(ngModel)]="sortBy" (ngModelChange)="onFilterChange()"
+          class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20">
+          <option value="name">Name (A-Z)</option>
+          <option value="price-asc">Price: Low to High</option>
+          <option value="price-desc">Price: High to Low</option>
+          <option value="rating">Top Rated</option>
+        </select>
       </div>
     </div>
-    }
+  </div>
 
-    <!-- Products Grid -->
-    @if (!isLoading && !error && products.length > 0) {
-    @if ((getFilteredProducts() | search : fromInput).length > 0) {
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-      @for (product of getPaginatedProducts(getFilteredProducts() | search : fromInput); track product._id) {
-      <div
-        class="bg-white rounded-xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden group relative border border-gray-100">
+  <!-- Active Filters Pills Bar -->
+  @if (selectedCategory || selectedBrand || fromInput) {
+    <div class="flex flex-wrap items-center gap-2 py-4">
+      <span class="text-xs font-semibold text-slate-500 mr-1">Active filters:</span>
+      @if (selectedCategory) {
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-full">
+          Category: {{ selectedCategory }}
+          <button (click)="selectedCategory = ''; onFilterChange()" class="hover:text-emerald-950 cursor-pointer" aria-label="Remove category filter">&times;</button>
+        </span>
+      }
+      @if (selectedBrand) {
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-full">
+          Brand: {{ selectedBrand }}
+          <button (click)="selectedBrand = ''; onFilterChange()" class="hover:text-emerald-950 cursor-pointer" aria-label="Remove brand filter">&times;</button>
+        </span>
+      }
+      @if (fromInput) {
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-full">
+          Keyword: "{{ fromInput }}"
+          <button (click)="fromInput = ''; onFilterChange()" class="hover:text-emerald-950 cursor-pointer" aria-label="Clear search keyword">&times;</button>
+        </span>
+      }
+      <button (click)="clearAllFilters()" class="text-xs font-semibold text-red-600 hover:text-red-700 hover:underline ms-2">
+        Clear All
+      </button>
+    </div>
+  }
 
-        <!-- Wishlist Heart Icon -->
-        <button (click)="toggleWishlist(product._id, $event)"
-          class="absolute top-3 right-3 z-10 p-2 rounded-full bg-white/90 backdrop-blur-sm shadow-lg hover:shadow-xl transition-all duration-300 group/heart">
+  <!-- Main Content Layout (Sidebar + Products Grid) -->
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 mt-6">
 
-          @if (isInWishlist(product._id)) {
-          <svg class="w-5 h-5 text-red-500 group-hover/heart:animate-pulse" fill="currentColor" viewBox="0 0 20 20">
-            <path fill-rule="evenodd"
-              d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z"
-              clip-rule="evenodd"></path>
-          </svg>
-          } @else {
-          <svg
-            class="w-5 h-5 text-gray-400 hover:text-red-500 transition-colors duration-300 group-hover/heart:animate-pulse"
-            fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z">
-            </path>
-          </svg>
-          }
-        </button>
+    <!-- Desktop Filters Sidebar -->
+    <aside class="hidden lg:block lg:col-span-1 space-y-6">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs space-y-6 sticky top-24">
 
-        <!-- Product Link -->
-        <div [routerLink]="['/p_details', product._id]" class="cursor-pointer">
-
-          <!-- Product Image -->
-          <div class="relative overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 h-56">
-            <img [src]="product.imageCover" [alt]="product.title"
-              class="w-full h-full object-cover transition-transform duration-500 group-hover:transform group-hover:rotate-2"
-              (error)="onImageError($event, product._id)" loading="lazy">
-
-            <!-- Image overlay with gradient -->
-            <div
-              class="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            </div>
-
-            <!-- Sale Badge -->
-            <div
-              class="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              Hot
-            </div>
-
-            <!-- Fallback placeholder -->
-            @if (isImageError(product._id)) {
-            <div
-              class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-200 to-gray-300 text-gray-400">
-              <div class="text-center">
-                <svg class="w-16 h-16 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z">
-                  </path>
-                </svg>
-                <p class="text-xs">Image not available</p>
-              </div>
-            </div>
-            }
-          </div>
-
-          <!-- Product Info -->
-          <div class="p-4">
-            <h1
-              class="text-gray-800 font-bold text-lg mb-2 line-clamp-2 group-hover:text-emerald-600 transition-colors duration-300">
-              {{ product.title.split(' ', 3).join(' ') }}
-            </h1>
-
-            <div class="flex justify-between items-center mb-3">
-              <h2 class="text-2xl font-bold text-emerald-600">
-                {{ product.price | currency : 'EGP' : 'symbol' : '1.0-0' }}
-              </h2>
-              <div class="flex items-center bg-yellow-50 px-2 py-1 rounded-full">
-                <svg class="w-4 h-4 text-yellow-500 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                  <path
-                    d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z">
-                  </path>
-                </svg>
-                <span class="text-yellow-700 text-sm font-medium">{{ product.ratingsAverage }}</span>
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between">
-              <span
-                class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                {{ product.category.name }}
-              </span>
-              <span class="text-xs text-gray-500">{{ product.ratingsQuantity }} reviews</span>
-            </div>
+        <!-- Search in Catalog Input -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-2.5">Search in Catalog</h3>
+          <div class="relative">
+            <input type="text" [(ngModel)]="fromInput" (ngModelChange)="onFilterChange()" placeholder="Keywords..."
+              class="w-full pl-8 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-600">
+            <span class="absolute inset-y-0 left-0 pl-2.5 flex items-center text-slate-400">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+              </svg>
+            </span>
           </div>
         </div>
 
-        <!-- Add to Cart Button -->
-        <div class="p-4 pt-0">
-          <button (click)="addToCart(product._id)"
-            class="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 text-white py-3 px-4 rounded-xl hover:from-emerald-600 hover:to-emerald-700 transform hover:-translate-y-1 hover:shadow-lg transition-all duration-300 font-medium flex items-center justify-center group/btn">
-            <svg class="w-5 h-5 mr-2 group-hover/btn:animate-bounce" fill="none" stroke="currentColor"
-              viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-2.5 2.5M7 13l2.5 2.5m6-2.5L17.5 8.5M17.5 8.5L15 11"></path>
-            </svg>
-            Add to Cart
+        <!-- Categories List -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Categories</h3>
+          <div class="space-y-1.5 max-h-56 overflow-y-auto pr-1">
+            <button (click)="selectedCategory = ''; onFilterChange()"
+              [class.text-emerald-700]="!selectedCategory"
+              [class.font-bold]="!selectedCategory"
+              class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-50 transition-colors flex items-center justify-between">
+              <span>All Categories</span>
+              <span>{{ products.length }}</span>
+            </button>
+            @for (cat of getUniqueCategories(); track cat) {
+              <button (click)="selectedCategory = cat; onFilterChange()"
+                [class.text-emerald-700]="selectedCategory === cat"
+                [class.font-bold]="selectedCategory === cat"
+                [class.bg-emerald-50]="selectedCategory === cat"
+                class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                {{ cat }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Brands List -->
+        <div>
+          <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Brands</h3>
+          <div class="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+            <button (click)="selectedBrand = ''; onFilterChange()"
+              [class.text-emerald-700]="!selectedBrand"
+              [class.font-bold]="!selectedBrand"
+              class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+              All Brands
+            </button>
+            @for (brand of getUniqueBrands(); track brand) {
+              <button (click)="selectedBrand = brand; onFilterChange()"
+                [class.text-emerald-700]="selectedBrand === brand"
+                [class.font-bold]="selectedBrand === brand"
+                [class.bg-emerald-50]="selectedBrand === brand"
+                class="w-full text-left px-2.5 py-1.5 rounded-lg text-xs text-slate-600 hover:bg-slate-50 transition-colors">
+                {{ brand }}
+              </button>
+            }
+          </div>
+        </div>
+
+      </div>
+    </aside>
+
+    <!-- Products Grid Section -->
+    <div class="lg:col-span-3">
+
+      <!-- Loading State -->
+      @if (isLoading) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          @for (skeleton of [1,2,3,4,5,6,7,8]; track skeleton) {
+            <div class="bg-white rounded-2xl p-3 border border-slate-200/80 animate-pulse">
+              <div class="bg-slate-100 aspect-square rounded-xl mb-3"></div>
+              <div class="h-3 bg-slate-100 rounded-md w-1/3 mb-2"></div>
+              <div class="h-4 bg-slate-100 rounded-md w-4/5 mb-3"></div>
+              <div class="h-5 bg-slate-100 rounded-md w-1/2 mb-4"></div>
+              <div class="h-9 bg-slate-100 rounded-xl w-full"></div>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Error State -->
+      @if (error && !isLoading) {
+        <div class="text-center py-16 bg-white rounded-2xl border border-red-200 p-8 max-w-md mx-auto">
+          <svg class="w-12 h-12 text-red-500 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <h3 class="text-base font-bold text-slate-800 mb-1">Failed to load products</h3>
+          <p class="text-xs text-slate-500 mb-4">{{ error }}</p>
+          <button (click)="loadProducts()" class="btn-primary text-xs px-5 py-2">
+            Try Again
           </button>
         </div>
-
-      </div>
       }
+
+      <!-- Products Grid -->
+      @if (!isLoading && !error && getFilteredProducts().length > 0) {
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          @for (product of getPaginatedProducts(); track product._id) {
+            <div class="product-card group bg-white rounded-2xl border border-slate-200/80 hover:border-emerald-300 hover:shadow-lg transition-all duration-200 flex flex-col justify-between overflow-hidden">
+
+              <!-- Wishlist Toggle -->
+              <button (click)="toggleWishlist(product._id, $event)"
+                class="absolute top-2.5 right-2.5 z-10 p-2 rounded-full bg-white/90 backdrop-blur-xs shadow-xs hover:bg-white text-slate-400 hover:text-red-500 transition-all cursor-pointer"
+                [attr.aria-label]="isInWishlist(product._id) ? 'Remove from wishlist' : 'Add to wishlist'">
+                @if (isInWishlist(product._id)) {
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path>
+                  </svg>
+                } @else {
+                  <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+                  </svg>
+                }
+              </button>
+
+              <!-- Product Link & Info -->
+              <div [routerLink]="['/p_details', product._id]" class="cursor-pointer p-3 sm:p-4 flex-1 flex flex-col">
+                <div class="relative w-full aspect-square bg-slate-50/60 rounded-xl overflow-hidden mb-3 flex items-center justify-center p-3">
+                  <img [src]="product.imageCover" [alt]="product.title"
+                    class="w-full h-full object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+                    loading="lazy">
+                  @if (isImageError(product._id)) {
+                    <div class="absolute inset-0 flex items-center justify-center bg-slate-100 text-slate-400">
+                      <span class="text-xs">No image</span>
+                    </div>
+                  }
+                </div>
+
+                <span class="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md w-fit mb-1.5">
+                  {{ product.category.name }}
+                </span>
+
+                <h3 class="text-xs sm:text-sm font-semibold text-slate-900 group-hover:text-emerald-700 transition-colors line-clamp-2 min-h-[2.5rem] leading-snug mb-2">
+                  {{ product.title }}
+                </h3>
+
+                <div class="mt-auto pt-2 flex items-center justify-between border-t border-slate-100">
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-base sm:text-lg font-bold text-slate-900">{{ product.price }}</span>
+                    <span class="text-[11px] font-semibold text-slate-500 uppercase ms-0.5">EGP</span>
+                  </div>
+
+                  <div class="flex items-center gap-1 text-[11px] font-semibold text-slate-700 bg-amber-50/80 border border-amber-100/60 px-1.5 py-0.5 rounded-md">
+                    <svg class="w-3.5 h-3.5 text-amber-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                    </svg>
+                    <span>{{ product.ratingsAverage }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Add to Cart Action -->
+              <div class="p-3 sm:p-4 pt-0">
+                <button (click)="addToCart(product._id)"
+                  class="w-full btn-primary text-xs sm:text-sm py-2 sm:py-2.5 rounded-xl font-semibold flex items-center justify-center gap-1.5 transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                  </svg>
+                  <span>Add to Cart</span>
+                </button>
+              </div>
+
+            </div>
+          }
+        </div>
+
+        <!-- Pagination Bar -->
+        @if (totalPages > 1) {
+          <div class="flex items-center justify-center gap-2 mt-12 pt-6 border-t border-slate-200">
+            <button (click)="previousPage()" [disabled]="currentPage === 1"
+              class="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              Previous
+            </button>
+
+            <div class="flex items-center gap-1">
+              @for (page of [].constructor(totalPages); track $index) {
+                <button (click)="goToPage($index + 1)"
+                  [class.bg-emerald-600]="currentPage === $index + 1"
+                  [class.text-white]="currentPage === $index + 1"
+                  [class.border-emerald-600]="currentPage === $index + 1"
+                  class="w-9 h-9 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors">
+                  {{ $index + 1 }}
+                </button>
+              }
+            </div>
+
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+              class="px-3.5 py-2 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+              Next
+            </button>
+          </div>
+        }
+      }
+
+      <!-- Empty Results State -->
+      @if (!isLoading && !error && getFilteredProducts().length === 0) {
+        <div class="text-center py-16 bg-white rounded-2xl border border-slate-200 p-8 max-w-md mx-auto my-6">
+          <svg class="w-12 h-12 text-slate-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+          </svg>
+          <h3 class="text-base font-bold text-slate-800 mb-1">No products match your filters</h3>
+          <p class="text-xs text-slate-500 mb-4">Try removing some of your filters or searching for something else.</p>
+          <button (click)="clearAllFilters()" class="btn-primary text-xs px-5 py-2.5">
+            Reset All Filters
+          </button>
+        </div>
+      }
+
     </div>
 
-    <!-- Empty State -->
-    @if ((getFilteredProducts() | search : fromInput).length === 0) {
-    <div class="text-center py-20">
-      <div class="bg-white border border-gray-200 rounded-xl p-8 max-w-md mx-auto shadow-lg">
-        <svg class="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4">
-          </path>
-        </svg>
-        <h3 class="text-lg font-semibold text-gray-800 mb-2">No Products Found</h3>
-        <p class="text-gray-600 mb-4">
-          @if (selectedCategory) {
-          No products found in {{ selectedCategory }} category.
-          } @else {
-          No products match your search criteria.
-          }
-        </p>
-        <button (click)="selectedCategory = ''; fromInput = ''"
-          class="bg-emerald-500 text-white px-6 py-2 rounded-lg hover:bg-emerald-600 transition-colors duration-300">
-          Clear Filters
-        </button>
-      </div>
-    </div>
-    }
-    }
-    }
   </div>
+
 </section>

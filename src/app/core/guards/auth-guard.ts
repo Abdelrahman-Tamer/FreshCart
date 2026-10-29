@@ -3,13 +3,15 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../../shared/services/authentication/auth.service';
 
 export const authGuard: CanActivateFn = (route, state) => {
-  let _AuthService = inject(AuthService)
-  let _Router = inject(Router)
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  if (_AuthService.isAuthenticated()) {
-    return true
+  if (authService.isAuthenticated()) {
+    return true;
   }
 
-  _AuthService.logOut()
-  return _Router.parseUrl('/not-found')
+  // Redirect to login preserving the requested return URL
+  return router.createUrlTree(['/login'], {
+    queryParams: { returnUrl: state.url }
+  });
 };

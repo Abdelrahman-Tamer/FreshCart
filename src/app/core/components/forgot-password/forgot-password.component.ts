@@ -22,15 +22,17 @@ export class ForgotPasswordComponent {
   errorMessage = '';
   successMessage = '';
   userEmail = '';
+  showNewPassword = false;
+  showConfirmPassword = false;
 
   // Form for email step
   emailForm: FormGroup = this._FormBuilder.group({
-    email: [null, [Validators.required, Validators.email]]
+    email: ['', [Validators.required, Validators.email]]
   });
 
   // Form for code verification step
   codeForm: FormGroup = this._FormBuilder.group({
-    resetCode: [null, [Validators.required]]
+    resetCode: ['', [Validators.required, Validators.minLength(4)]]
   });
 
   // Form for new password step
@@ -49,6 +51,14 @@ export class ForgotPasswordComponent {
       return { passwordMismatch: true };
     }
     return null;
+  }
+
+  toggleNewPassword(): void {
+    this.showNewPassword = !this.showNewPassword;
+  }
+
+  toggleConfirmPassword(): void {
+    this.showConfirmPassword = !this.showConfirmPassword;
   }
 
   // Step 1: Send reset code to email
@@ -75,7 +85,7 @@ export class ForgotPasswordComponent {
         }
       });
     } else {
-      this.emailForm.get('email')?.markAsTouched();
+      this.emailForm.markAllAsTouched();
     }
   }
 
@@ -94,14 +104,11 @@ export class ForgotPasswordComponent {
       this._AuthService.verifyResetCode(codeData).subscribe({
         next: (res) => {
           this.isLoading = false;
-          // Check if response is successful (status 200 and no error message)
           if (res && !res.message?.toLowerCase().includes('invalid') && !res.message?.toLowerCase().includes('error')) {
             this.successMessage = 'Code verified successfully!';
             this.currentStep = 3;
-            // Set email in password form
             this.passwordForm.patchValue({ email: this.userEmail });
           } else if (res && res.status === 'success') {
-            // Alternative check for success status
             this.successMessage = 'Code verified successfully!';
             this.currentStep = 3;
             this.passwordForm.patchValue({ email: this.userEmail });
@@ -115,7 +122,7 @@ export class ForgotPasswordComponent {
         }
       });
     } else {
-      this.codeForm.get('resetCode')?.markAsTouched();
+      this.codeForm.markAllAsTouched();
     }
   }
 
@@ -134,18 +141,16 @@ export class ForgotPasswordComponent {
       this._AuthService.resetPassword(resetData).subscribe({
         next: (res) => {
           this.isLoading = false;
-          // Check if response is successful (status 200 and no error message)
           if (res && !res.message?.toLowerCase().includes('failed') && !res.message?.toLowerCase().includes('error')) {
             this.successMessage = 'Password reset successfully! Redirecting to login...';
             setTimeout(() => {
               this._Router.navigate(['/login']);
-            }, 2000);
+            }, 1800);
           } else if (res && res.status === 'success') {
-            // Alternative check for success status
             this.successMessage = 'Password reset successfully! Redirecting to login...';
             setTimeout(() => {
               this._Router.navigate(['/login']);
-            }, 2000);
+            }, 1800);
           } else {
             this.errorMessage = res.message || 'Failed to reset password. Please try again.';
           }
@@ -156,8 +161,7 @@ export class ForgotPasswordComponent {
         }
       });
     } else {
-      this.passwordForm.get('newPassword')?.markAsTouched();
-      this.passwordForm.get('confirmPassword')?.markAsTouched();
+      this.passwordForm.markAllAsTouched();
     }
   }
 
@@ -175,33 +179,22 @@ export class ForgotPasswordComponent {
     const form = (this as any)[formName] as FormGroup;
     const field = form.get(fieldName);
     
-    if (field?.errors && field.touched) {
+    if (field?.errors && (field.touched || field.dirty)) {
       if (field.errors['required']) {
-        return `${fieldName} is required`;
+        return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
       }
       if (field.errors['email']) {
         return 'Please enter a valid email address';
       }
       if (field.errors['minlength']) {
-        return `${fieldName} must be at least ${field.errors['minlength'].requiredLength} characters`;
-      }
-      if (field.errors['maxlength']) {
-        return `${fieldName} must not exceed ${field.errors['maxlength'].requiredLength} characters`;
+        return `Must be at least ${field.errors['minlength'].requiredLength} characters`;
       }
     }
     
-    // Check for form-level errors (like password mismatch)
-    if (formName === 'passwordForm' && form.errors?.['passwordMismatch'] && field?.touched) {
+    if (formName === 'passwordForm' && form.errors?.['passwordMismatch'] && (field?.touched || field?.dirty)) {
       return 'Passwords do not match';
     }
     
     return '';
-  }
-
-  // Check if field is valid
-  isFieldValid(formName: string, fieldName: string): boolean {
-    const form = (this as any)[formName] as FormGroup;
-    const field = form.get(fieldName);
-    return !!(field?.valid && field.touched);
   }
 }

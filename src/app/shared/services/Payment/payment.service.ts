@@ -17,9 +17,12 @@ export class PaymentService {
     });
   }
 
-  // Create online payment session (Stripe)
-  createOnlinePaymentSession(cartId: string, requestData: any): Observable<any> {
-    return this._HttpClient.post(`${environment.baseURL}/api/v1/orders/checkout-session/${cartId}`, requestData);
+  // Create online payment session (Stripe) with optional returnUrl query parameter
+  createOnlinePaymentSession(cartId: string, requestData: any, returnUrl?: string): Observable<any> {
+    const url = returnUrl
+      ? `${environment.baseURL}/api/v1/orders/checkout-session/${cartId}?url=${encodeURIComponent(returnUrl)}`
+      : `${environment.baseURL}/api/v1/orders/checkout-session/${cartId}`;
+    return this._HttpClient.post(url, requestData);
   }
 
   // Verify Stripe payment (after successful payment)

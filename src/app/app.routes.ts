@@ -15,40 +15,48 @@ import { PaymentSuccessComponent } from './features/components/payment-success/p
 import { WishlistComponent } from './features/components/wishlist/wishlist.component';
 import { OrdersComponent } from './features/components/orders/orders.component';
 import { authGuard } from './core/guards/auth-guard';
+import { guestGuard } from './core/guards/guest-guard';
 
 export const routes: Routes = [
+  { path: '', redirectTo: 'home', pathMatch: 'full' },
 
-    { path: '', loadComponent: () => import('./core/components/redirect/redirect.component').then((c) => c.RedirectComponent), pathMatch: 'full' },
+  {
+    path: '',
+    component: AuthLayoutComponent,
+    canActivate: [guestGuard],
+    children: [
+      { path: 'login', component: LoginComponent, title: 'FreshCart - Login' },
+      { path: 'register', component: RegisterComponent, title: 'FreshCart - Register' },
+      { path: 'forgot-password', component: ForgotPasswordComponent, title: 'FreshCart - Forgot Password' }
+    ]
+  },
 
-    {
-        path: '', component: AuthLayoutComponent, children: [
-            { path: 'login', component: LoginComponent, title: 'Login' },
-            { path: 'register', component: RegisterComponent, title: 'Register' },
-            { path: 'forgot-password', component: ForgotPasswordComponent, title: 'Forgot Password' }
-        ]
-    },
+  { path: 'payment-success', component: PaymentSuccessComponent, title: 'FreshCart - Payment Success' },
+  { path: 'not-found', component: NotfoundComponent, title: 'FreshCart - Not Found' },
 
-    // Payment success route (no auth guard for Stripe return)
-    { path: 'payment-success', component: PaymentSuccessComponent, title: 'Payment Success' },
+  {
+    path: '',
+    component: MainLayoutComponent,
+    children: [
+      // Public browsing routes
+      { path: 'home', component: HomeComponent, title: 'FreshCart - Home' },
+      { path: 'products', component: ProductsComponent, title: 'FreshCart - Products' },
+      { path: 'categories', component: CategoriesComponent, title: 'FreshCart - Categories' },
+      { path: 'brands', component: BrandsComponent, title: 'FreshCart - Brands' },
+      {
+        path: 'p_details/:p_id',
+        loadComponent: () => import('./features/components/p-details/p-details.component').then((c) => c.PDetailsComponent),
+        title: 'FreshCart - Product Details'
+      },
 
-    // Unauthorized / access-denied page (no auth guard — always visible)
-    { path: 'not-found', component: NotfoundComponent, title: 'Access Denied' },
+      // Protected customer routes
+      { path: 'cart', component: CartComponent, canActivate: [authGuard], title: 'FreshCart - Shopping Cart' },
+      { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard], title: 'FreshCart - My Wishlist' },
+      { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], title: 'FreshCart - Checkout' },
+      { path: 'orders', component: OrdersComponent, canActivate: [authGuard], title: 'FreshCart - My Orders' },
+      { path: 'allorders', redirectTo: 'orders', pathMatch: 'full' },
+    ]
+  },
 
-    {
-        path: '', component: MainLayoutComponent, canActivate: [authGuard], children: [
-
-            { path: 'home', component: HomeComponent, title: 'Home' },
-            { path: 'allorders', redirectTo: 'orders', pathMatch: 'full' },
-            { path: 'brands', component: BrandsComponent, title: 'Brands' },
-            { path: 'categories', component: CategoriesComponent, title: 'Categories' },
-            { path: 'cart', component: CartComponent, title: 'Shopping Cart' },
-            { path: 'wishlist', component: WishlistComponent, title: 'Wishlist' },
-            { path: 'orders', component: OrdersComponent, title: 'My Orders' },
-            { path: 'checkout', component: CheckoutComponent, title: 'Checkout' },
-            { path: 'products', component: ProductsComponent, title: 'Products' },
-            { path: 'p_details/:p_id', loadComponent: () => import('./features/components/p-details/p-details.component').then((c) => c.PDetailsComponent), title: 'product details' },
-        ]
-    },
-    { path: "**", component: NotfoundComponent, title: '404' }
-
+  { path: '**', component: NotfoundComponent, title: 'FreshCart - 404 Not Found' }
 ];

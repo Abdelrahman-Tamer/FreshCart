@@ -1,11 +1,11 @@
 import { Component, OnInit, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { CatagoriesService } from '../../../../../shared/services/Categories/catagories.service';
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
 
 @Component({
   selector: 'app-categories-slider',
-  imports: [CarouselModule],
+  imports: [CarouselModule, RouterLink],
   templateUrl: './categories-slider.component.html',
   styleUrl: './categories-slider.component.css'
 })
@@ -33,7 +33,7 @@ export class CategoriesSliderComponent implements OnInit {
       940: { items: 6 }
     },
     nav: false
-  }
+  };
 
   ngOnInit(): void {
     this._CatagoriesService.getAllCategories().subscribe({

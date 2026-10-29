@@ -1,43 +1,72 @@
-<div class="main-slider">
-
-    <div class="container-auto">
-
-        <div class="flex flex-wrap">
-
-            <div class="w-full md:w-1/2 lg:w-3/4">
-
-                <owl-carousel-o [options]="myOptions">
-                    <ng-template carouselSlide>
-                        <img src="./images/img1.avif" class="h-80" alt="">
-                    </ng-template>
-                    <ng-template carouselSlide>
-                        <img src="./images/img2.avif" class="h-80" alt="">
-                    </ng-template>
-                    <ng-template carouselSlide>
-                        <img src="./images/img3.avif" class="h-80" alt="">
-                    </ng-template>
-                    <ng-template carouselSlide>
-                        <img src="./images/img5.avif" class="h-80" alt="">
-                    </ng-template>
-                    <ng-template carouselSlide>
-                        <img src="./images/img4.avif" class="h-80" alt="">
-                    </ng-template>
-                   
-                </owl-carousel-o>
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+  <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
+    <!-- Main Promotional Slider -->
+    <div class="lg:col-span-3 rounded-2xl overflow-hidden shadow-xs border border-slate-200/60 bg-white">
+      <owl-carousel-o [options]="myOptions">
+        <ng-template carouselSlide>
+          <div class="relative w-full h-[260px] sm:h-[360px] lg:h-[400px]">
+            <img src="./images/img1.avif" class="w-full h-full object-cover" alt="Fresh Groceries">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent flex flex-col justify-center px-6 sm:px-12 text-white">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/90 backdrop-blur-xs text-xs font-bold uppercase tracking-wider rounded-full w-fit mb-3">
+                Fresh & Organic
+              </span>
+              <h2 class="text-2xl sm:text-4xl font-extrabold max-w-md leading-tight mb-2">
+                Healthy Farm Vegetables Delivered Daily
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-200 max-w-sm mb-4 hidden sm:block">
+                Sourced directly from certified organic farms to your kitchen.
+              </p>
             </div>
-
-
-            <div class="w-full md:w-1/2 lg:w-1/4">
-
-                <img src="./images/banner-4.jpeg" class="w-full block h-40" alt="">
-                <img src="./images/grocery-banner-2.jpeg" class="w-full block h-40" alt="">
-
+          </div>
+        </ng-template>
+        <ng-template carouselSlide>
+          <div class="relative w-full h-[260px] sm:h-[360px] lg:h-[400px]">
+            <img src="./images/img2.avif" class="w-full h-full object-cover" alt="Weekly Deals">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent flex flex-col justify-center px-6 sm:px-12 text-white">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-amber-500/90 backdrop-blur-xs text-xs font-bold uppercase tracking-wider rounded-full w-fit mb-3">
+                Weekly Offers
+              </span>
+              <h2 class="text-2xl sm:text-4xl font-extrabold max-w-md leading-tight mb-2">
+                Up to 30% Off on Pantry Essentials
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-200 max-w-sm mb-4 hidden sm:block">
+                Stock up on your favorite everyday items with exclusive discounts.
+              </p>
             </div>
-
-        </div>
-
-
+          </div>
+        </ng-template>
+        <ng-template carouselSlide>
+          <div class="relative w-full h-[260px] sm:h-[360px] lg:h-[400px]">
+            <img src="./images/img3.avif" class="w-full h-full object-cover" alt="Bakery and Dairy">
+            <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/20 to-transparent flex flex-col justify-center px-6 sm:px-12 text-white">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-500/90 backdrop-blur-xs text-xs font-bold uppercase tracking-wider rounded-full w-fit mb-3">
+                Bakery & Dairy
+              </span>
+              <h2 class="text-2xl sm:text-4xl font-extrabold max-w-md leading-tight mb-2">
+                Freshly Baked Bread & Pure Artisan Dairy
+              </h2>
+            </div>
+          </div>
+        </ng-template>
+      </owl-carousel-o>
     </div>
 
-
+    <!-- Side Promo Cards -->
+    <div class="hidden lg:flex flex-col gap-4">
+      <div class="relative h-[192px] rounded-2xl overflow-hidden shadow-xs border border-slate-200/60 group">
+        <img src="./images/banner-4.jpeg" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="Special Deal">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4 text-white">
+          <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">Fast Delivery</span>
+          <h3 class="text-base font-bold leading-snug">30-Minute Express Delivery to Your Door</h3>
+        </div>
+      </div>
+      <div class="relative h-[192px] rounded-2xl overflow-hidden shadow-xs border border-slate-200/60 group">
+        <img src="./images/grocery-banner-2.jpeg" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" alt="Snacks and Beverages">
+        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex flex-col justify-end p-4 text-white">
+          <span class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">Best Quality</span>
+          <h3 class="text-base font-bold leading-snug">Everyday Low Prices Guaranteed</h3>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

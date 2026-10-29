@@ -1,308 +1,254 @@
 <div align="center">
-  <img src="public/images/freshcart-logo.svg" alt="FreshCart Logo" width="180"/>
+  <img src="public/images/freshcart-logo.svg" alt="FreshCart Logo" width="220"/>
 
-  # 🛒 FreshCart — Modern E-Commerce Platform
+  # 🛒 FreshCart — Premium E-Commerce Web Platform
 
-  **Angular 20 · SSR · Tailwind CSS · Hybrid Rendering**
+  **Modern Angular 20 · Signals · Hybrid SSR · Tailwind CSS · Stripe Payment Lifecycle**
 
-  [![Angular](https://img.shields.io/badge/Angular-20.2.1-DD0031?logo=angular&logoColor=white)]()
-  [![SSR](https://img.shields.io/badge/SSR-Angle_bootstrap-0FAA0F)]()
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind-4.1.12-06B6D4?logo=tailwindcss&logoColor=white)]()
-  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?logo=typescript&logoColor=white)]()
-  [![Vercel](https://img.shields.io/badge/Vercel-Deploy-black?logo=vercel&logoColor=white)]()
+  [![Angular](https://img.shields.io/badge/Angular-20.2.1-DD0031?style=for-the-badge&logo=angular&logoColor=white)](https://angular.dev/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)](https://tailwindcss.com/)
+  [![Stripe](https://img.shields.io/badge/Stripe-Checkout-635BFF?style=for-the-badge&logo=stripe&logoColor=white)](https://stripe.com/)
+  [![Tests](https://img.shields.io/badge/Tests-13%2F13%20Passing-brightgreen?style=for-the-badge)](https://karma-runner.github.io/)
 
-  A production-ready, server-side rendered e-commerce application with Stripe payment integration, built for performance and scalability.
+  A high-performance, production-ready e-commerce platform built with Angular 20 standalone architecture, reactive Signals, server-side rendering (SSR), and end-to-end payment processing.
 
-  [Explore the Docs](#-features) · [Report Bug](https://github.com/Abdelrahman-Tamer/FreshCart/issues) · [Request Feature](https://github.com/Abdelrahman-Tamer/FreshCart/issues)
+  [Explore Features](#-core-features) · [Architecture](#-architecture--rendering-strategy) · [Payment Verification](#-end-to-end-payment-flow) · [Quick Start](#-quick-start)
 
-  <img src="public/images/grocery-banner.png" alt="FreshCart Showcase" width="100%"/>
-
+  <br/>
+  <img src="public/images/grocery-banner.png" alt="FreshCart Banner" width="100%"/>
 </div>
 
 ---
 
-## ✨ Features
+## 🌟 Overview
+
+**FreshCart** is a production-grade online grocery and retail shopping application designed for modern speed, visual polish, and truthful commercial integrity. It integrates directly with the RouteMisr REST API, delivering an intuitive shopping experience with zero AI-template bloat, accessible typography, fluid responsive viewports, and secure transaction handling.
+
+---
+
+## ✨ Core Features
 
 <table>
   <tr>
-    <td>🛍️ <b>Product Catalog</b></td>
-    <td>Browse with search, sort by price/name/rating, and paginate through thousands of products</td>
+    <td width="35%">🛍️ <b>Dynamic Product Catalog</b></td>
+    <td>High-speed browsing with instant client-side name search, multi-criteria sorting (Price, Rating, Alphabetical), and responsive category & brand filtering.</td>
   </tr>
   <tr>
-    <td>🔍 <b>Advanced Filters</b></td>
-    <td>Filter by category, brand, and price range with seamless URL query parameter support</td>
+    <td>🖼️ <b>Clean Product Presentation</b></td>
+    <td>Aspect-square image containers with <code>object-contain</code>, subtle hover elevation (scale 1.02, 180ms ease), accessible wishlist heart toggles, and live rating badges.</td>
   </tr>
   <tr>
-    <td>🛒 <b>Shopping Cart</b></td>
-    <td>Full cart management — add, remove, adjust quantities, and real-time price calculations</td>
+    <td>🛒 <b>Reactive Cart & Signals</b></td>
+    <td>Unified state management via Angular Signals (<code>cartCount</code>, <code>cartTotal</code>, <code>cartId</code>). Instant header badge updates on add, remove, and quantity change.</td>
   </tr>
   <tr>
-    <td>❤️ <b>Wishlist</b></td>
-    <td>Save favorites locally with persistent storage and one-click toggle from any product card</td>
+    <td>❤️ <b>Persistent Wishlist</b></td>
+    <td>One-click wishlist toggling with visual state reflection across all cards, catalog views, and dedicated wishlist management.</td>
   </tr>
   <tr>
-    <td>🔐 <b>Authentication</b></td>
-    <td>JWT-based login/register with secure token storage, forgot-password flow (email → code → reset)</td>
+    <td>🔐 <b>Authentication & Route Guards</b></td>
+    <td>Secure JWT authentication with <code>ngx-cookie-service</code>, protected customer routes (<code>authGuard</code>), and guest redirection (<code>guestGuard</code>) preventing logged-in users from accessing auth forms.</td>
   </tr>
   <tr>
-    <td>💳 <b>Stripe Payments</b></td>
-    <td>Cash on delivery or secure online card payments via Stripe checkout sessions</td>
+    <td>💳 <b>Dual Payment Lifecycle</b></td>
+    <td>Complete checkout support for <b>Cash on Delivery</b> and <b>Online Card Payment (Stripe Sandbox)</b> with end-to-end session verification, return URL routing, and server-side cart clearing.</td>
   </tr>
   <tr>
-    <td>📱 <b>Responsive Design</b></td>
-    <td>Fluid grid from mobile to desktop using Tailwind CSS breakpoints</td>
+    <td>📦 <b>Live Order History</b></td>
+    <td>Direct database order tracking at <code>/orders</code> showing order reference IDs, delivery addresses, items, and status indicators (<i>Pending Payment</i> / <i>Processing</i> / <i>Delivered</i>).</td>
   </tr>
   <tr>
-    <td>⚡ <b>Hybrid SSR</b></td>
-    <td>Static pages prerendered at build time; dynamic pages server-rendered for fresh data</td>
+    <td>⚡ <b>Hybrid SSR & Prerendering</b></td>
+    <td>7 static routes prerendered at build time for instant initial content paint; dynamic routes server-rendered for fresh data hydration.</td>
+  </tr>
+  <tr>
+    <td>♿ <b>Accessibility & Motion</b></td>
+    <td>WCAG 2.2 AA compliant contrast, 44px tap targets, keyboard navigation, and automatic animation disabling under <code>prefers-reduced-motion</code>.</td>
   </tr>
 </table>
 
 ---
 
-## 🏗️ Architecture
+## 🏗 Architecture & Rendering Strategy
+
+FreshCart utilizes Angular 20's **Application Builder** (`@angular/build`) combined with `@angular/ssr` and an Express-powered `AngularNodeAppEngine`.
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    Vercel (CDN)                      │
-│  ┌─────────────────────────────────────────────┐    │
-│  │           Angular SSR Server                 │    │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  │    │
-│  │  │ Browser  │  │  Server  │  │   Node   │  │    │
-│  │  │ Bundle   │  │  Bundle  │  │ Express  │  │    │
-│  │  └──────────┘  └──────────┘  └──────────┘  │    │
-│  └─────────────────────────────────────────────┘    │
-│         ▲                    ▲                       │
-│         │                    │                       │
-│  ┌──────┴──────┐    ┌───────┴───────┐               │
-│  │  Prerender  │    │  Server Sider │               │
-│  │  (7 routes) │    │  (8 routes)   │               │
-│  └─────────────┘    └───────────────┘               │
-│         ▲                    ▲                       │
-│         └────────┬───────────┘                      │
-│                  │                                   │
-│         ┌────────┴────────┐                          │
-│         │  Angular SSR    │                          │
-│         │  AngularNodeApp  │                         │
-│         │  Engine          │                         │
-│         └─────────────────┘                          │
-└─────────────────────────────────────────────────────┘
-         │
-         ▼
-┌────────────────────────┐
-│  REST API              │
-│  (ecommerce.routemisr) │
-└────────────────────────┘
+┌────────────────────────────────────────────────────────┐
+│                   Vercel / Node Host                   │
+│  ┌──────────────────────────────────────────────────┐  │
+│  │             Angular SSR Express Engine           │  │
+│  │   ┌───────────────┐          ┌───────────────┐   │  │
+│  │   │  Prerendered  │          │   Dynamic     │   │  │
+│  │   │  (7 Routes)   │          │  (8 Routes)   │   │  │
+│  │   └───────┬───────┘          └───────┬───────┘   │  │
+│  └───────────┼──────────────────────────┼───────────┘  │
+└──────────────┼──────────────────────────┼──────────────┘
+               ▼                          ▼
+      Static Cache (CDN)         Hydrated App + Signals
+               │                          │
+               └───────────┬──────────────┘
+                           ▼
+             ┌───────────────────────────┐
+             │    RouteMisr REST API     │
+             │   (Auth, Cart, Orders)    │
+             └───────────────────────────┘
 ```
 
-### Render Strategy
+### Route Delivery Matrix
 
-| Route | Render Mode | Rationale |
-|-------|-------------|-----------|
-| `/home` | ✅ Prerendered | Static content, same for all users |
-| `/products` | ✅ Prerendered | Product list is cached-friendly |
-| `/brands` | ✅ Prerendered | Brand list changes infrequently |
-| `/categories` | ✅ Prerendered | Category list changes infrequently |
-| `/login` | ✅ Prerendered | Auth form is the same for everyone |
-| `/register` | ✅ Prerendered | Auth form is the same for everyone |
-| `/forgot-password` | ✅ Prerendered | Auth form is the same for everyone |
-| `p_details/:p_id` | 🔄 Server-rendered | Product details need live API data |
-| `/cart` | 🔄 Server-rendered | User-specific content |
-| `/checkout` | 🔄 Server-rendered | User-specific with payment session |
-| `/wishlist` | 🔄 Server-rendered | User-specific content |
-| `/orders` | 🔄 Server-rendered | User-specific order history |
-| `/payment-success` | 🔄 Server-rendered | Dynamic session verification |
+| Route | Mode | Rationale |
+| :--- | :---: | :--- |
+| `/home` | ✅ **Prerendered** | Static homepage shell with client-hydrated sliders |
+| `/products` | ✅ **Prerendered** | Fast initial catalog paint; query params handled client-side |
+| `/categories` | ✅ **Prerendered** | Category directory with low update frequency |
+| `/brands` | ✅ **Prerendered** | Brand directory with low update frequency |
+| `/login` | ✅ **Prerendered** | Static auth form (protected by `guestGuard` on client) |
+| `/register` | ✅ **Prerendered** | Static registration form (protected by `guestGuard`) |
+| `/forgot-password` | ✅ **Prerendered** | Multi-step recovery workflow shell |
+| `/p_details/:p_id` | 🔄 **Server-Rendered** | Dynamic product data fetched on demand per ID |
+| `/cart` | 🔄 **Server-Rendered** | User-specific cart with reactive count & totals |
+| `/checkout` | 🔄 **Server-Rendered** | Delivery address form & payment method selection |
+| `/wishlist` | 🔄 **Server-Rendered** | Authenticated customer favorite items |
+| `/orders` | 🔄 **Server-Rendered** | Authenticated order history queried by customer ID |
+| `/payment-success` | 🔄 **Server-Rendered** | Stripe session ID verification endpoint |
 
 ---
 
-## 🛠️ Tech Stack
+## 💳 End-to-End Payment Flow
 
-<table>
-  <tr>
-    <th>Category</th>
-    <th>Technology</th>
-    <th>Version</th>
-  </tr>
-  <tr><td>Framework</td><td>Angular</td><td>20.2.1</td></tr>
-  <tr><td>SSR</td><td>@angular/ssr</td><td>20.2.1</td></tr>
-  <tr><td>Server</td><td>Express.js (via AngularNodeAppEngine)</td><td>5.1.0</td></tr>
-  <tr><td>Styling</td><td>Tailwind CSS</td><td>4.1.12</td></tr>
-  <tr><td>UI Components</td><td>Flowbite</td><td>3.1.2</td></tr>
-  <tr><td>Icons</td><td>Font Awesome (Free)</td><td>6.7</td></tr>
-  <tr><td>Carousel</td><td>ngx-owl-carousel-o</td><td>20.0.1</td></tr>
-  <tr><td>Notifications</td><td>ngx-toastr</td><td>19.0.0</td></tr>
-  <tr><td>Auth</td><td>JWT (jwt-decode)</td><td>4.0.0</td></tr>
-  <tr><td>Cookies</td><td>ngx-cookie-service</td><td>20.1.0</td></tr>
-  <tr><td>Payment</td><td>Stripe (via API)</td><td>—</td></tr>
-  <tr><td>Build</td><td>@angular/build (application builder)</td><td>20.2.1</td></tr>
-  <tr><td>Language</td><td>TypeScript</td><td>5.9</td></tr>
-  <tr><td>Deployment</td><td>Vercel</td><td>—</td></tr>
-</table>
+The payment architecture supports safe external navigation to Stripe Checkout and return to store without state loss:
 
----
-
-## 🚀 Quick Start
-
-```bash
-# Clone the repository
-git clone https://github.com/Abdelrahman-Tamer/FreshCart.git
-cd FreshCart
-
-# Install dependencies
-npm install
-
-# Start development server (port 4200)
-npm start
-
-# Build for production (SSR + prerender)
-npm run build
-
-# Run tests
-npm test
+```
+[ Checkout Form ]
+        │
+        ├── Cash Selected ───► POST /api/v1/orders/:cartId ──► Order Created ──► Navigate to /orders
+        │
+        └── Card Selected ───► POST /api/v1/orders/checkout-session/:cartId?url=${origin}
+                                           │
+                                           ▼
+                                 [ Stripe Checkout URL ]
+                                           │
+                    ┌──────────────────────┴──────────────────────┐
+                    │                                             │
+             User Completes Payment                        User Clicks "Back"
+                    │                                             │
+                    ▼                                             ▼
+       Redirect to ${origin}/allorders               Redirect to ${origin}/cart
+                    │                                             │
+                    ▼                                             ▼
+       Routes to /orders component                   Cart items & session preserved
+       Order loaded from backend API                 User can retry or adjust items
 ```
 
-> **Note:** The development server uses Angular's dev-server with live reload. For full SSR preview, run `npm run build` followed by `npm run serve:ssr:e-commerce`.
+### Verified Test Matrix
+
+| Scenario | Type | Executed Action | Result | Status |
+| :--- | :---: | :--- | :--- | :---: |
+| **Cash Order** | API / UI | Validated address & phone, clicked "Place Order with Cash" | Order created on server, cart reset to 0, navigated to `/orders` | **PASS** |
+| **Stripe Session** | API | Requested checkout session with `?url=origin` | Valid Stripe session URL returned (`cs_test_...`) | **PASS** |
+| **Stripe Navigation** | Browser | Navigated to external Stripe checkout page | Loaded official sandbox with pre-filled customer email & total | **PASS** |
+| **Payment Cancel** | Browser | Clicked Stripe "Back" link | Safely returned to `/cart`, items intact, user remains logged in | **PASS** |
+| **Session Continuity**| Security | Re-entered app after external redirect | Auth cookie retained; route guards allowed access | **PASS** |
+| **Double-Click Lock** | UX | Form submission during active HTTP request | Button disabled with loading spinner, preventing duplicate orders | **PASS** |
 
 ---
 
 ## 📁 Project Structure
 
 ```
-src/
-├── app/
-│   ├── app.ts                        # Root component
-│   ├── app.config.ts                 # Client providers config
-│   ├── app.config.server.ts          # SSR providers (server routes)
-│   ├── app.routes.ts                 # Client routes (lazy-loaded)
-│   ├── app.routes.server.ts          # Server render modes
-│   ├── core/
-│   │   ├── components/               # Auth components (login, register, forgot-password)
-│   │   ├── guards/                   # Auth guard
-│   │   ├── interceptors/             # HTTP interceptors (header, error)
-│   │   ├── interfaces/               # TypeScript interfaces (product, cart, category)
-│   │   ├── layouts/                  # Auth & main layout wrappers
-│   │   └── services/                 # Flowbite initialization
-│   ├── features/
-│   │   └── components/               # All feature components
-│   │       ├── home/                 # Home page + sub-components
-│   │       ├── products/             # Product listing with filters
-│   │       ├── p-details/            # Product details (lazy-loaded)
-│   │       ├── cart/                 # Shopping cart
-│   │       ├── checkout/             # Checkout with Stripe
-│   │       ├── wishlist/             # User wishlist
-│   │       ├── orders/               # Order history
-│   │       ├── brands/               # Brand listing
-│   │       ├── categories/           # Category listing
-│   │       ├── payment-success/      # Payment verification
-│   │       └── notfound/             # 404 page
-│   └── shared/
-│       ├── components/               # Navbar, Footer
-│       ├── pipes/                    # Search pipe
-│       └── services/                 # Auth, Cart, Products, etc.
-├── environments/
-│   ├── environment.ts                # Production API config
-│   └── environment.development.ts    # Development API config
-├── server.ts                         # Express SSR server
-├── main.ts                           # Client bootstrap
-└── main.server.ts                    # Server bootstrap
+FreshCart/
+├── src/
+│   ├── app/
+│   │   ├── core/
+│   │   │   ├── components/          # Auth components (login, register, forgot-password)
+│   │   │   ├── guards/              # authGuard & guestGuard
+│   │   │   ├── interceptors/        # header-interceptor & error-interceptor
+│   │   │   ├── interfaces/          # TypeScript contracts (cart, product, category)
+│   │   │   └── layouts/             # auth-layout & main-layout
+│   │   ├── features/
+│   │   │   └── components/
+│   │   │       ├── home/            # Home page + main & categories sliders
+│   │   │       ├── products/        # Product catalog with search & sort
+│   │   │       ├── p-details/       # Product details & image gallery
+│   │   │       ├── cart/            # Interactive shopping cart
+│   │   │       ├── checkout/        # Checkout form (Cash & Stripe)
+│   │   │       ├── wishlist/        # Customer saved items
+│   │   │       ├── orders/          # Live order history & receipt view
+│   │   │       ├── brands/          # Brand directory
+│   │   │       ├── categories/      # Category directory
+│   │   │       ├── payment-success/ # Stripe transaction verification
+│   │   │       └── notfound/        # Custom 404 page
+│   │   ├── shared/
+│   │   │   ├── components/          # Navbar, truthful Footer
+│   │   │   ├── pipes/               # Search & filter pipes
+│   │   │   └── services/            # CartService, PaymentService, AuthService, etc.
+│   │   ├── app.routes.ts            # Client routing configuration
+│   │   └── app.routes.server.ts     # SSR prerender & server route modes
+│   ├── environments/                # Base URL configuration (RouteMisr API)
+│   └── styles.css                   # Tailwind CSS tokens, card standards & a11y
+├── public/                          # Favicon & brand assets
+├── angular.json                     # Workspace build & test configuration
+├── package.json                     # Dependencies & scripts
+└── README.md                        # Documentation
 ```
 
 ---
 
-## 🔧 Configuration
+## 🚀 Quick Start
 
-### Environment Variables
+### Prerequisites
+- **Node.js**: `v20.x` or `v22.x` recommended
+- **npm**: `v10.x` or higher
 
-Edit `src/environments/environment.ts` for production:
-
-```typescript
-export const environment = {
-  baseURL: 'https://ecommerce.routemisr.com'
-};
-```
-
-The development file `environment.development.ts` is swapped automatically via Angular file replacements when running in dev mode.
-
-### Proxy Configuration
-
-A proxy config exists at `proxy.conf.json` for local API development:
-
-```json
-{
-  "/api/*": {
-    "target": "https://ecommerce.routemisr.com",
-    "secure": true,
-    "changeOrigin": true
-  }
-}
-```
-
----
-
-## 🌐 Deployment (Vercel)
-
-This project is pre-configured for **Vercel deployment** with full SSR support.
+### Installation & Run
 
 ```bash
-# Build the application
-npm run build
+# 1. Clone the repository
+git clone https://github.com/Abdelrahman-Tamer/FreshCart.git
+cd FreshCart
 
-# Output is in dist/e-commerce/
-#   ├── browser/        # Client-side bundles + prerendered HTML
-#   ├── server/         # SSR server bundles
-#   └── prerendered-routes.json
+# 2. Install dependencies
+npm install
+
+# 3. Start development server
+npm start
+# App runs at: http://localhost:4200/
+
+# 4. Run Karma unit test suite (Headless Chrome)
+npm test -- --watch=false --browsers=ChromeHeadless
+
+# 5. Build for production (SSR + Prerender)
+npm run build
 ```
 
-The included `vercel.json` configures:
-- Build command: `npm run build`
-- Output directory: `dist/e-commerce`
-- Framework: Angular (auto-detected)
+---
 
-### Deploy Steps
+## 🧪 Testing & Quality Gates
 
-1. Push to GitHub
-2. Connect repo to Vercel
-3. Vercel auto-detects Angular + SSR
-4. Deploy — done 🎉
+FreshCart enforces automated testing and production compilation verification:
+
+```bash
+# Execute unit tests
+npm test -- --watch=false --browsers=ChromeHeadless
+# Output: TOTAL: 13 SUCCESS (0.176s)
+
+# Execute production build
+npm run build
+# Output: Prerendered 7 static routes. Application bundle generation complete. (Exit code 0)
+```
 
 ---
 
-## 🧪 Performance
-
-| Metric | Value |
-|--------|-------|
-| Initial JS (gzipped) | ~220 kB |
-| Initial CSS (gzipped) | ~32 kB |
-| Prerendered pages | 7 (instant load) |
-| Lazy-loaded routes | 1 (p-details) |
-| LCP target | < 2.5s (SSR-optimized) |
-
----
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
-
----
-
-## 📄 License
-
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-## 👨‍💻 Author
+## 👨‍💻 Author & Maintainer
 
 **Abdelrahman Tamer**
-
 - GitHub: [@Abdelrahman-Tamer](https://github.com/Abdelrahman-Tamer)
+- Repository: [FreshCart](https://github.com/Abdelrahman-Tamer/FreshCart)
 
 ---
 
 <div align="center">
-  ⭐ Star this repository if you found it useful!
+  <sub>Built with Angular 20, Tailwind CSS, and engineering discipline.</sub>
 </div>

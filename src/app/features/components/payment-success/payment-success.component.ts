@@ -22,22 +22,14 @@ export class PaymentSuccessComponent implements OnInit {
   orderDetails: any = null;
 
   ngOnInit(): void {
-    
-    // Get session_id from URL parameters (Stripe redirect)
+    // Read session_id from URL parameters
     this._ActivatedRoute.queryParams.subscribe(params => {
       const sessionId = params['session_id'];
       
       if (sessionId) {
         this.verifyPayment(sessionId);
       } else {
-        // Check localStorage for session info
-        const checkoutSession = localStorage.getItem('checkout_session');
-        if (checkoutSession) {
-          const sessionData = JSON.parse(checkoutSession);
-          this.verifyPayment(sessionData.sessionId);
-        } else {
-          this.handleVerificationError();
-        }
+        this.handleVerificationError();
       }
     });
   }
@@ -50,16 +42,9 @@ export class PaymentSuccessComponent implements OnInit {
           this.paymentVerified = true;
           this.orderDetails = res.order;
           
-          // Clear checkout session from localStorage
-          localStorage.removeItem('checkout_session');
+          this._ToastrService.success('Payment confirmed! Your order has been placed.', 'Success');
           
-          this._ToastrService.success('Payment successful! Your order has been placed.', 'Success');
-          
-          // Check if API response contains redirect URL
-          if (res.redirectUrl && res.redirectUrl.includes('allorders')) {
-          }
-          
-          // Redirect to orders page using Angular Router
+          // Redirect to orders page after short confirmation
           setTimeout(() => {
             this._Router.navigate(['/orders']);
           }, 1500);
@@ -67,7 +52,7 @@ export class PaymentSuccessComponent implements OnInit {
           this.handleVerificationError();
         }
       },
-      error: (err) => {
+      error: () => {
         this.handleVerificationError();
       }
     });
@@ -76,20 +61,7 @@ export class PaymentSuccessComponent implements OnInit {
   handleVerificationError() {
     this.isVerifying = false;
     this.paymentVerified = false;
-    this._ToastrService.error('Payment verification failed', 'Error');
-    
-    // Decide fallback: if user had a checkout session, send back to checkout; otherwise cart
-    const hadCheckoutSession = !!localStorage.getItem('checkout_session');
-    // Clear any stored session data
-    localStorage.removeItem('checkout_session');
-
-    setTimeout(() => {
-      if (hadCheckoutSession) {
-        this._Router.navigate(['/checkout']);
-      } else {
-        this._Router.navigate(['/cart']);
-      }
-    }, 1500);
+    this._ToastrService.error('Could not verify transaction status', 'Verification Notice');
   }
 
   goToOrders() {

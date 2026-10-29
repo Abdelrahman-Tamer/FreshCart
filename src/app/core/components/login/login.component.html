@@ -1,48 +1,155 @@
-<section class="min-h-[calc(100vh-80px)] flex justify-center items-center py-12">
-  <div class="md:w-[30%] mx-3 w-full shadow-md rounded-2xl p-5">
-    <h1 class="section-head font-black text-center">Login Now</h1>
-
-    <form [formGroup]="loginForm" (ngSubmit)="login()">
-      <div class="relative my-5">
-        <input formControlName="email" type="email" id="login_email"
-          class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
-          placeholder=" " />
-        <label for="login_email"
-          class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Email</label>
+<section class="min-h-[calc(100vh-140px)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50/60">
+  <div class="w-full max-w-md">
+    
+    <!-- Auth Card -->
+    <div class="bg-white rounded-2xl border border-neutral-200/80 shadow-sm p-6 sm:p-8">
+      
+      <!-- Brand & Header -->
+      <div class="text-center mb-6">
+        <a routerLink="/home" class="inline-flex items-center gap-2 mb-3 group">
+          <img src="/images/freshcart-logo.svg" alt="FreshCart" class="h-8 w-auto">
+        </a>
+        <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Welcome back</h1>
+        <p class="text-xs text-neutral-500 mt-1">Sign in with your email to access your account, orders, and wishlist</p>
       </div>
 
-      <div class="relative my-5">
-        <input formControlName="password" type="password" id="login_password"
-          class="block rounded-lg px-2.5 pb-2.5 pt-5 w-full text-sm text-gray-500 bg-gray-50 border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-emerald-500 peer"
-          placeholder=" " />
-        <label for="login_password"
-          class="absolute text-sm text-gray-500 duration-300 transform -translate-y-4 scale-75 top-4 z-10 origin-[0] start-2.5 peer-focus:text-emerald-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-4 rtl:peer-focus:translate-x-1/4 rtl:peer-focus:left-auto">Password</label>
-      </div>
-
-      <button [disabled]="loginForm.invalid || isLoading"
-        class="w-full bg-emerald-500 text-white py-3 px-4 rounded-lg font-medium hover:bg-emerald-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-300 flex items-center justify-center">
-        @if (isLoading) {
-          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      <!-- Server Error Alert -->
+      @if (errorMessage) {
+        <div class="mb-5 p-3.5 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2.5 text-xs text-red-700 animate-fadeIn" role="alert">
+          <svg class="w-4 h-4 text-red-500 shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
           </svg>
-          Signing in...
-        } @else {
-          Login
-        }
-      </button>
-    </form>
+          <div class="flex-1 font-medium">{{ errorMessage }}</div>
+        </div>
+      }
 
-    <div class="text-center mt-4 space-y-2 flex justify-center items-center">
-      <p class="text-sm text-gray-500">
-        Forgot Password?
-        <span class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300">
-          <a routerLink="/forgot-password"
-            class="text-emerald-600 hover:text-emerald-700 font-medium transition-colors duration-300 cursor-pointer">
-            Click here
+      <form [formGroup]="loginForm" (ngSubmit)="login()" class="space-y-4" novalidate>
+        
+        <!-- Email Field -->
+        <div>
+          <label for="login_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">
+            Email address <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-neutral-400">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+              </svg>
+            </div>
+            <input 
+              formControlName="email" 
+              type="email" 
+              id="login_email"
+              autocomplete="email"
+              placeholder="you@example.com"
+              class="form-input ps-10"
+              [class.border-red-400]="emailControl?.invalid && (emailControl?.touched || emailControl?.dirty)"
+            />
+          </div>
+          @if (emailControl?.invalid && (emailControl?.touched || emailControl?.dirty)) {
+            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1">
+              <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              @if (emailControl?.errors?.['required']) {
+                Email is required
+              } @else if (emailControl?.errors?.['email']) {
+                Please enter a valid email address
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Password Field -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <label for="login_password" class="block text-xs font-semibold text-neutral-700">
+              Password <span class="text-red-500">*</span>
+            </label>
+            <a routerLink="/forgot-password" class="text-xs font-medium text-emerald-600 hover:text-emerald-700 transition-colors">
+              Forgot password?
+            </a>
+          </div>
+          <div class="relative">
+            <div class="absolute inset-y-0 start-0 flex items-center ps-3.5 pointer-events-none text-neutral-400">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+            </div>
+            <input 
+              formControlName="password" 
+              [type]="showPassword ? 'text' : 'password'" 
+              id="login_password"
+              autocomplete="current-password"
+              placeholder="••••••••"
+              class="form-input ps-10 pe-10"
+              [class.border-red-400]="passwordControl?.invalid && (passwordControl?.touched || passwordControl?.dirty)"
+            />
+            <button 
+              type="button" 
+              (click)="togglePasswordVisibility()" 
+              class="absolute inset-y-0 end-0 flex items-center pe-3.5 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+            >
+              @if (showPassword) {
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 1.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.451 10.451 0 0 1 12 4.5c4.756 0 8.773 3.162 10.065 7.498a10.522 10.522 0 0 1-4.293 5.774M6.228 6.228 3 3m3.228 3.228 3.65 3.65m7.894 7.894L21 21m-3.228-3.228-3.65-3.65m0 0a3 3 0 1 0-4.243-4.243m4.242 4.242L9.88 9.88" />
+                </svg>
+              } @else {
+                <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+              }
+            </button>
+          </div>
+          @if (passwordControl?.invalid && (passwordControl?.touched || passwordControl?.dirty)) {
+            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1">
+              <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              @if (passwordControl?.errors?.['required']) {
+                Password is required
+              } @else if (passwordControl?.errors?.['minlength']) {
+                Password must be at least 6 characters
+              }
+            </p>
+          }
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+          type="submit"
+          [disabled]="loginForm.invalid || isLoading"
+          class="btn-primary w-full py-2.5 mt-2 justify-center shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          @if (isLoading) {
+            <svg class="animate-spin -ms-1 me-2 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span>Signing in...</span>
+          } @else {
+            <span>Sign In</span>
+            <svg class="w-4 h-4 ms-1 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+            </svg>
+          }
+        </button>
+
+      </form>
+
+      <!-- Footer / Switch to Register -->
+      <div class="mt-6 pt-5 border-t border-neutral-100 text-center">
+        <p class="text-xs text-neutral-600">
+          Don't have an account yet?
+          <a routerLink="/register" class="font-semibold text-emerald-600 hover:text-emerald-700 ms-1 transition-colors">
+            Create an account
           </a>
-        </span>
-      </p>
+        </p>
+      </div>
+
     </div>
+
   </div>
 </section>

@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { CommonModule } from '@angular/common';
 
@@ -13,18 +13,32 @@ import { CommonModule } from '@angular/common';
 })
 export class LoginComponent {
 
-  private readonly _FormBuilder = inject(FormBuilder)
-  private readonly _AuthService = inject(AuthService)
-  private readonly _CookieService = inject(CookieService)
-  private readonly _Router = inject(Router)
+  private readonly _FormBuilder = inject(FormBuilder);
+  private readonly _AuthService = inject(AuthService);
+  private readonly _CookieService = inject(CookieService);
+  private readonly _Router = inject(Router);
+  private readonly _ActivatedRoute = inject(ActivatedRoute);
 
   isLoading = false;
   errorMessage = '';
+  showPassword = false;
 
   loginForm: FormGroup = this._FormBuilder.group({
-    email: [null, [Validators.required, Validators.email]],
-    password: [null, [Validators.required, Validators.pattern(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^a-zA-Z\d]).{8,20}$/)]]
-  })
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', [Validators.required, Validators.minLength(6)]]
+  });
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
+  }
+
+  get emailControl() {
+    return this.loginForm.get('email');
+  }
+
+  get passwordControl() {
+    return this.loginForm.get('password');
+  }
 
   login() {
     if (this.loginForm.valid) {
@@ -34,19 +48,22 @@ export class LoginComponent {
         next: (res) => {
           this.isLoading = false;
           if (res.message === "success") {
-            this._CookieService.set('token', res.token);
+            this._CookieService.set('token', res.token, { path: '/', sameSite: 'Lax' });
             if (this._CookieService.get('token')) {
               this._AuthService.decodeToken();
               this._AuthService.updateLoginStatus(true);
             }
-            this._Router.navigate(['/home']);
+            const returnUrl = this._ActivatedRoute.snapshot.queryParams['returnUrl'] || '/home';
+            this._Router.navigateByUrl(returnUrl);
           }
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.error?.message || 'Login failed. Please check your credentials.';
+          this.errorMessage = err.error?.message || 'Invalid email or password. Please try again.';
         }
       });
+    } else {
+      this.loginForm.markAllAsTouched();
     }
   }
 }

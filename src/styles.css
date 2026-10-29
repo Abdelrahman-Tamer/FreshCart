@@ -3,167 +3,233 @@
 @source "../node_modules/flowbite";
 @import "tailwindcss";
 
+/* ==========================================================================
+   FreshCart Design System Tokens
+   ========================================================================== */
 :root {
-  --main-color: #0aad0a;
-  --light-color: #f0f3f2;
-  --shadow: rgba(145, 158, 171, 0.2) 0px 2px 4px -1px,
-    rgba(145, 158, 171, 0.14) 0px 4px 5px 0px,
-    rgba(145, 158, 171, 0.12) 0px 1px 10px 0px;
-  --font-family: "Encode Sans Expanded", sans-serif;
-  --rating-color: #ffc908;
+  /* Brand Colors */
+  --color-brand-primary: #059669;       /* Emerald 600 */
+  --color-brand-hover: #047857;         /* Emerald 700 */
+  --color-brand-active: #065f46;        /* Emerald 800 */
+  --color-brand-light: #ecfdf5;         /* Emerald 50 */
+  --color-brand-subtle: #d1fae5;        /* Emerald 100 */
+
+  /* Neutral Surface & Background Colors */
+  --color-bg-page: #f8fafc;             /* Slate 50 */
+  --color-bg-surface: #ffffff;
+  --color-bg-subtle: #f1f5f9;           /* Slate 100 */
+  --color-bg-muted: #e2e8f0;            /* Slate 200 */
+
+  /* Typography Colors */
+  --color-text-primary: #0f172a;        /* Slate 900 */
+  --color-text-secondary: #334155;      /* Slate 700 */
+  --color-text-muted: #64748b;          /* Slate 500 */
+  --color-text-subtle: #94a3b8;         /* Slate 400 */
+
+  /* Semantic Feedback Colors */
+  --color-success: #10b981;
+  --color-danger: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
+  --color-rating: #f59e0b;
+
+  /* Elevation Shadows */
+  --shadow-card: 0 1px 3px 0 rgb(0 0 0 / 0.05), 0 1px 2px -1px rgb(0 0 0 / 0.05);
+  --shadow-card-hover: 0 12px 24px -4px rgb(5 150 105 / 0.12), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+  --shadow-modal: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+  /* Typography Font Stack */
+  --font-family-base: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Base Body Styles */
 body {
-  font-family: var(--font-family) !important;
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg-page);
+  color: var(--color-text-secondary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.nav-link {
-  transition: unset !important;
+/* Custom Scrollbar for modern look */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-.active-link {
-  background-color: var(--main-color) !important;
-  color: var(--light-color) !important;
-  border-radius: 5px;
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
 
-.rating-color {
-  color: var(--rating-color);
+/* ==========================================================================
+   Product Card Design System
+   ========================================================================== */
+.product-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 1rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
 }
-.cursor-pointer {
-  cursor: pointer;
+
+.product-card:hover {
+  border-color: #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.06), 0 8px 10px -6px rgb(0 0 0 / 0.04);
 }
-.product {
-  border-radius: 5px;
-  border: solid 1px var(--main-color);
-  transition: box-shadow 0.5s;
+
+.product-image-container {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  background-color: #ffffff;
   overflow: hidden;
 }
 
-.product:hover {
-  box-shadow: 0 0 10px #11bd1168;
-}
-
-.font-sm {
-  font-size: 12px;
-}
-.text-main {
-  color: var(--main-color);
-}
-.bg-main {
-  background-color: var(--main-color) !important;
-}
-.bg-main-light {
-  background-color: var(--light-color) !important;
-}
-
-.btn-main {
-  background-color: var(--main-color);
-  padding: 7px 20px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-  color: #fff;
-  cursor: pointer;
-  transition: background-color 0.5s;
-}
-.btn-main:disabled {
-  cursor: not-allowed;
-  background-color: #ccc;
-}
-.btn-main:disabled:hover {
-  background-color: #ccc;
-}
-.btn-main:hover {
-  background-color: #11bd11;
-}
-
-.main-btn {
+.product-image-container img {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
-  background-color: var(--main-color);
-  padding: 0.75rem 1rem;
-  border-radius: 0.5rem;
-  color: #fff;
-  font-weight: 500;
+  height: 100%;
+  object-fit: contain;
+  padding: 1rem;
+  transition: transform 0.25s ease;
+}
+
+.product-card:hover .product-image-container img {
+  transform: scale(1.02);
+}
+
+/* ==========================================================================
+   Standard Button Components
+   ========================================================================== */
+.btn-primary {
+  background-color: #059669;
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
   cursor: pointer;
-  transition: background-color 0.3s;
+  transition: background-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
 }
 
-.main-btn:hover {
-  background-color: #11bd11;
+.btn-primary:hover:not(:disabled) {
+  background-color: #047857;
+  box-shadow: 0 4px 12px rgb(5 150 105 / 0.25);
+  transform: translateY(-1px);
 }
 
-.main-btn:disabled {
+.btn-primary:active:not(:disabled) {
+  background-color: #065f46;
+  transform: translateY(0);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.btn-primary:disabled {
+  background-color: #e2e8f0;
+  color: #94a3b8;
   cursor: not-allowed;
-  background-color: #d1d5db;
+  box-shadow: none;
+  transform: none;
 }
 
-.main-btn:disabled:hover {
-  background-color: #d1d5db;
+.btn-outline {
+  background: #ffffff;
+  color: #059669;
+  font-weight: 600;
+  font-size: 0.875rem;
+  padding: 0.625rem 1.25rem;
+  border-radius: 0.75rem;
+  border: 1.5px solid #059669;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-/* Toast notifications — consistent look & placement */
-.ngx-toastr {
-  border-radius: 1rem !important;
-  padding: 0.85rem 1.25rem !important;
-  font-weight: 700 !important;
-  font-size: 0.9rem !important;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
-  display: flex !important;
-  align-items: center !important;
-  gap: 0.6rem !important;
-  pointer-events: auto !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+.btn-outline:hover:not(:disabled) {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #047857;
 }
 
-.ngx-toastr .toast-close-button {
-  font-size: 1.1rem !important;
-  opacity: 0.7 !important;
-  transition: opacity 0.2s !important;
+/* ==========================================================================
+   Form Input Standard Classes
+   ========================================================================== */
+.form-input {
+  width: 100%;
+  padding-block: 0.75rem;
+  padding-inline: 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.75rem;
+  background-color: #ffffff;
+  color: #0f172a;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
-.ngx-toastr .toast-close-button:hover {
-  opacity: 1 !important;
+/* Inputs with leading icons receive 44px (2.75rem) clearance for icon positioning */
+.form-input.ps-10,
+.form-input.pl-10,
+input.form-input.ps-10,
+input.form-input.pl-10 {
+  padding-inline-start: 2.75rem;
+  padding-left: 2.75rem;
 }
 
-.ngx-toastr .toast-progress {
-  border-radius: 0 0 1rem 1rem !important;
-  height: 3px !important;
-  opacity: 0.6 !important;
+/* Inputs with trailing icons or visibility toggles receive 44px clearance */
+.form-input.pe-10,
+.form-input.pr-10,
+input.form-input.pe-10,
+input.form-input.pr-10 {
+  padding-inline-end: 2.75rem;
+  padding-right: 2.75rem;
 }
 
-/* Success toast */
-.ngx-toastr.toast-success {
-  background: linear-gradient(135deg, #0aad0a, #11bd11) !important;
-  color: #fff !important;
+.form-input:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 0 0 0 3px rgb(5 150 105 / 0.15);
 }
 
-/* Error toast */
-.ngx-toastr.toast-error {
-  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
-  color: #fff !important;
+.form-input.is-invalid {
+  border-color: #ef4444;
 }
 
-/* Info toast */
-.ngx-toastr.toast-info {
-  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
-  color: #fff !important;
+.form-input.is-invalid:focus {
+  box-shadow: 0 0 0 3px rgb(239 68 68 / 0.15);
 }
 
-/* Warning toast */
-.ngx-toastr.toast-warning {
-  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
-  color: #fff !important;
-}
-
-/* Unified FreshCart toast placement and shape */
+/* ==========================================================================
+   Toastr Unified Styles
+   ========================================================================== */
 .toast-container.toast-top-right {
   position: fixed !important;
-  top: 1rem !important;
-  right: 1rem !important;
+  top: 1.25rem !important;
+  right: 1.25rem !important;
   bottom: auto !important;
   left: auto !important;
   z-index: 999999 !important;
-  width: min(360px, calc(100vw - 2rem)) !important;
+  width: min(380px, calc(100vw - 2rem)) !important;
 }
 
 .toast-container .ngx-toastr.freshcart-toast {
@@ -172,23 +238,61 @@ body {
   margin: 0 0 0.75rem !important;
   border-radius: 0.875rem !important;
   padding: 0.85rem 1.1rem !important;
-  background-image: none !important;
+  font-weight: 600 !important;
+  font-size: 0.875rem !important;
+  box-shadow: 0 10px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.6rem !important;
+  border: 1px solid rgb(255 255 255 / 0.2) !important;
+  backdrop-filter: blur(12px) !important;
 }
 
-.toast-container .ngx-toastr.freshcart-toast .toast-progress {
-  border-radius: 0 0 0.875rem 0.875rem !important;
+.ngx-toastr.toast-success {
+  background: linear-gradient(135deg, #059669, #10b981) !important;
+  color: #ffffff !important;
 }
 
-.my-valid {
-  border-color: var(--main-color) !important;
+.ngx-toastr.toast-error {
+  background: linear-gradient(135deg, #dc2626, #ef4444) !important;
+  color: #ffffff !important;
 }
 
-.my-invalid {
-  border-color: #ef4444 !important;
+.ngx-toastr.toast-info {
+  background: linear-gradient(135deg, #2563eb, #3b82f6) !important;
+  color: #ffffff !important;
 }
 
-.section-head {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1f2937;
+.ngx-toastr.toast-warning {
+  background: linear-gradient(135deg, #d97706, #f59e0b) !important;
+  color: #ffffff !important;
 }
+
+/* Text & Headings */
+.section-title {
+  font-size: 1.875rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  max-width: 60ch;
+  margin-inline: auto;
+}
+
+/* ==========================================================================
+   Accessibility & Reduced Motion
+   ========================================================================== */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

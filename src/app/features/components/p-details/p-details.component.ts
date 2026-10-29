@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, DestroyRef } from '@angular/core';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { ProductsService } from '../../../shared/services/Products/products.service';
 import { IProduct } from '../../../core/interfaces/iproduct.interface';
 import { CarouselModule, OwlOptions } from 'ngx-owl-carousel-o';
@@ -7,6 +7,8 @@ import { switchMap, catchError, of } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { CartService } from '../../../shared/services/Cart/cart.service';
+import { WishlistService } from '../../../shared/services/Wishlist/wishlist.service';
+import { AuthService } from '../../../shared/services/authentication/auth.service';
 import { ToastrService } from 'ngx-toastr';
 
 @Component({
@@ -17,32 +19,37 @@ import { ToastrService } from 'ngx-toastr';
 })
 export class PDetailsComponent implements OnInit {
   customOptions: OwlOptions = {
-    loop: true,
+    loop: false,
     mouseDrag: true,
     touchDrag: true,
     pullDrag: true,
-    dots: true,
-    autoplay: true,
-    navSpeed: 700,
+    dots: false,
+    autoplay: false,
+    navSpeed: 400,
     navText: ['', ''],
     responsive: {
-      0: { items: 1 },
-      400: { items: 2 },
-      740: { items: 3 },
-      940: { items: 4 }
+      0: { items: 3 },
+      400: { items: 4 },
+      740: { items: 5 }
     },
     nav: false
-  }
+  };
 
-  productDetails: IProduct = {} as IProduct
+  productDetails: IProduct = {} as IProduct;
+  activeImage = '';
+  quantity = 1;
   isLoading = true;
+  isAddingToCart = false;
   error = '';
 
-  private readonly _ActivatedRoute = inject(ActivatedRoute)
-  private readonly _ProductsService = inject(ProductsService)
-  private readonly _DestroyRef = inject(DestroyRef)
-  private readonly _CartService = inject(CartService)
-  private readonly toastr = inject(ToastrService)
+  private readonly _ActivatedRoute = inject(ActivatedRoute);
+  private readonly _ProductsService = inject(ProductsService);
+  private readonly _DestroyRef = inject(DestroyRef);
+  private readonly _CartService = inject(CartService);
+  private readonly _WishlistService = inject(WishlistService);
+  private readonly _AuthService = inject(AuthService);
+  private readonly _Router = inject(Router);
+  private readonly toastr = inject(ToastrService);
 
   ngOnInit(): void {
     this._ActivatedRoute.paramMap.pipe(
@@ -61,23 +68,83 @@ export class PDetailsComponent implements OnInit {
       })
     ).subscribe({
       next: (res) => {
-        if (res) {
+        if (res?.data) {
           this.productDetails = res.data;
+          this.activeImage = res.data.imageCover || res.data.images?.[0] || '';
+          this.quantity = 1;
           this.isLoading = false;
         }
       }
-    })
+    });
+  }
+
+  setActiveImage(img: string) {
+    this.activeImage = img;
+  }
+
+  increaseQuantity() {
+    this.quantity++;
+  }
+
+  decreaseQuantity() {
+    if (this.quantity > 1) {
+      this.quantity--;
+    }
   }
 
   addToCart(p_id: string) {
+    if (!this._AuthService.isAuthenticated()) {
+      this.toastr.info('Please sign in to add items to your cart', 'Sign In Required');
+      this._Router.navigate(['/login'], { queryParams: { returnUrl: `/p_details/${p_id}` } });
+      return;
+    }
+
+    this.isAddingToCart = true;
     this._CartService.AddProductToCart(p_id).subscribe({
       next: (res) => {
-        this.toastr.success(res.message, res.status, {
-          timeOut: 3000,
+        this.isAddingToCart = false;
+        this.toastr.success(res.message || 'Product added to your cart', 'Added to Cart', {
+          timeOut: 2500,
           closeButton: true,
           progressBar: true
         });
       },
+      error: () => {
+        this.isAddingToCart = false;
+        this.toastr.error('Failed to add product to cart', 'Error');
+      }
     });
+  }
+
+  toggleWishlist(productId: string) {
+    if (!this._AuthService.isAuthenticated()) {
+      this.toastr.info('Please sign in to save items to your wishlist', 'Sign In Required');
+      this._Router.navigate(['/login'], { queryParams: { returnUrl: `/p_details/${productId}` } });
+      return;
+    }
+
+    if (this.isInWishlist(productId)) {
+      this._WishlistService.removeFromWishlist(productId).subscribe({
+        next: () => {
+          this.toastr.info('Removed from your wishlist', 'Wishlist Updated');
+        },
+        error: () => {
+          this.toastr.error('Could not update wishlist', 'Error');
+        }
+      });
+    } else {
+      this._WishlistService.addToWishlist(productId).subscribe({
+        next: () => {
+          this.toastr.success('Saved to your wishlist', 'Wishlist Updated');
+        },
+        error: () => {
+          this.toastr.error('Could not update wishlist', 'Error');
+        }
+      });
+    }
+  }
+
+  isInWishlist(productId: string): boolean {
+    return this._WishlistService.isInWishlist(productId);
   }
 }
