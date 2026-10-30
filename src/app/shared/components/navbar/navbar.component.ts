@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, OnDestroy } from '@angular/core';
+import { Component, OnInit, inject, OnDestroy, HostListener } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/authentication/auth.service';
@@ -21,12 +21,27 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoggedIn = false;
   userName = '';
   isMobileMenuOpen = false;
+  isUserDropdownOpen = false;
   searchQuery = '';
   private subscription?: Subscription;
 
   // Modern Angular signals for live reactivity
   readonly cartCount = this._CartService.cartCount;
   readonly wishlistCount = this._WishlistService.wishlistCount;
+
+  get userInitials(): string {
+    if (!this.userName) return 'U';
+    const parts = this.userName.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+
+  get userFirstName(): string {
+    if (!this.userName) return 'Account';
+    return this.userName.trim().split(/\s+/)[0];
+  }
 
   ngOnInit(): void {
     this.subscription = this._AuthService.isLoggedIn.subscribe({
@@ -58,6 +73,32 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscription?.unsubscribe();
   }
 
+  toggleUserDropdown(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    this.isUserDropdownOpen = !this.isUserDropdownOpen;
+  }
+
+  closeUserDropdown(): void {
+    this.isUserDropdownOpen = false;
+  }
+
+  clearSearch(): void {
+    this.searchQuery = '';
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    this.isUserDropdownOpen = false;
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey(): void {
+    this.isUserDropdownOpen = false;
+    this.isMobileMenuOpen = false;
+  }
+
   onSearchSubmit(): void {
     if (this.searchQuery.trim()) {
       this._Router.navigate(['/products'], {
@@ -69,6 +110,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   logOut(): void {
+    this.isUserDropdownOpen = false;
+    this.isMobileMenuOpen = false;
     this._AuthService.logOut();
     this._CartService.resetState();
     this._WishlistService.resetState();
