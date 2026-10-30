@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
 import { CommonModule } from '@angular/common';
+import { formatApiError } from '../../utils/error-handler';
 
 @Component({
   selector: 'app-forgot-password',
@@ -81,7 +82,8 @@ export class ForgotPasswordComponent {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error?.message || 'An error occurred. Please try again.';
+          const formatted = formatApiError(error, '/forgotPasswords');
+          this.errorMessage = formatted.message;
         }
       });
     } else {
@@ -118,7 +120,8 @@ export class ForgotPasswordComponent {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error?.message || 'Invalid code. Please try again.';
+          const formatted = formatApiError(error, '/verifyResetCode');
+          this.errorMessage = formatted.message;
         }
       });
     } else {
@@ -157,7 +160,8 @@ export class ForgotPasswordComponent {
         },
         error: (error) => {
           this.isLoading = false;
-          this.errorMessage = error.error?.message || 'An error occurred. Please try again.';
+          const formatted = formatApiError(error, '/forgotPasswords');
+          this.errorMessage = formatted.message;
         }
       });
     } else {

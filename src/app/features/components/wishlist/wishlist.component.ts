@@ -50,7 +50,7 @@ export class WishlistComponent implements OnInit {
         this.toastr.success('Removed from wishlist', 'Wishlist');
       },
       error: () => {
-        this.toastr.error('Failed to remove from wishlist', 'Error');
+        this.toastr.error('Failed to remove from wishlist. Please try again.', 'Wishlist');
       }
     });
   }
@@ -65,7 +65,7 @@ export class WishlistComponent implements OnInit {
         });
       },
       error: () => {
-        this.toastr.error('Failed to add to cart', 'Error');
+        this.toastr.error('Could not add product to cart. Please try again.', 'Shopping Cart');
       }
     });
   }

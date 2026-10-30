@@ -9,6 +9,7 @@ import {
 import { AuthService } from '../../../shared/services/authentication/auth.service';
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { formatApiError } from '../../utils/error-handler';
 
 @Component({
   selector: 'app-register',
@@ -95,7 +96,8 @@ export class RegisterComponent {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.error?.message || 'Registration failed. Please verify your details.';
+          const formatted = formatApiError(err, '/signup');
+          this.errorMessage = formatted.message;
         }
       });
     } else {

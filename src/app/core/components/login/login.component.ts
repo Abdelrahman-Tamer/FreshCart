@@ -4,6 +4,7 @@ import { AuthService } from '../../../shared/services/authentication/auth.servic
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
 import { CommonModule } from '@angular/common';
+import { formatApiError } from '../../utils/error-handler';
 
 @Component({
   selector: 'app-login',
@@ -59,7 +60,8 @@ export class LoginComponent {
         },
         error: (err) => {
           this.isLoading = false;
-          this.errorMessage = err.error?.message || 'Invalid email or password. Please try again.';
+          const formatted = formatApiError(err, '/signin');
+          this.errorMessage = formatted.message;
         }
       });
     } else {

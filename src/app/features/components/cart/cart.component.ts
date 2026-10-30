@@ -49,7 +49,7 @@ export class CartComponent implements OnInit {
       },
       error: () => {
         this.updatingItemId = null;
-        this.toastr.error('Could not update quantity. Please try again.', 'Error');
+        this.toastr.error('Could not update quantity. Please try again.', 'Cart Update');
       }
     });
   }
@@ -64,7 +64,7 @@ export class CartComponent implements OnInit {
       },
       error: () => {
         this.updatingItemId = null;
-        this.toastr.error('Could not remove item. Please try again.', 'Error');
+        this.toastr.error('Could not remove item. Please try again.', 'Cart Update');
       }
     });
   }
@@ -80,7 +80,7 @@ export class CartComponent implements OnInit {
         },
         error: () => {
           this.isLoading = false;
-          this.toastr.error('Failed to clear cart. Please try again.', 'Error');
+          this.toastr.error('Failed to clear cart. Please try again.', 'Cart Update');
         }
       });
     }

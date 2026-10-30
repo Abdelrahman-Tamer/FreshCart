@@ -111,7 +111,7 @@ export class PDetailsComponent implements OnInit {
       },
       error: () => {
         this.isAddingToCart = false;
-        this.toastr.error('Failed to add product to cart', 'Error');
+        this.toastr.error('Could not add product to cart. Please try again.', 'Shopping Cart');
       }
     });
   }
@@ -129,7 +129,7 @@ export class PDetailsComponent implements OnInit {
           this.toastr.info('Removed from your wishlist', 'Wishlist Updated');
         },
         error: () => {
-          this.toastr.error('Could not update wishlist', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     } else {
@@ -138,7 +138,7 @@ export class PDetailsComponent implements OnInit {
           this.toastr.success('Saved to your wishlist', 'Wishlist Updated');
         },
         error: () => {
-          this.toastr.error('Could not update wishlist', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     }

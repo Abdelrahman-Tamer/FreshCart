@@ -175,7 +175,7 @@ export class ProductsComponent implements OnInit {
         });
       },
       error: () => {
-        this.toastr.error('Could not add product to cart. Please try again.', 'Error');
+        this.toastr.error('Could not add product to cart. Please try again.', 'Shopping Cart');
       }
     });
   }
@@ -200,7 +200,7 @@ export class ProductsComponent implements OnInit {
           });
         },
         error: () => {
-          this.toastr.error('Could not update wishlist. Please try again.', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     } else {
@@ -213,7 +213,7 @@ export class ProductsComponent implements OnInit {
           });
         },
         error: () => {
-          this.toastr.error('Could not update wishlist. Please try again.', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     }

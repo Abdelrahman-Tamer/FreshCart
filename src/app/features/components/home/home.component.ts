@@ -60,7 +60,7 @@ export class HomeComponent implements OnInit {
         });
       },
       error: () => {
-        this.toastr.error('Failed to add product to cart', 'Error');
+        this.toastr.error('Could not add product to cart. Please try again.', 'Shopping Cart');
       }
     });
   }
@@ -83,7 +83,7 @@ export class HomeComponent implements OnInit {
           });
         },
         error: () => {
-          this.toastr.error('Failed to update wishlist', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     } else {
@@ -94,7 +94,7 @@ export class HomeComponent implements OnInit {
           });
         },
         error: () => {
-          this.toastr.error('Failed to update wishlist', 'Error');
+          this.toastr.error('Could not update your wishlist. Please try again.', 'Wishlist');
         }
       });
     }
