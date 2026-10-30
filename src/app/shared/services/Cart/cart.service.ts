@@ -18,19 +18,33 @@ export class CartService {
   readonly cartTotal = signal<number>(0);
   readonly cartId = signal<string>('');
 
+  private isRefreshing = false;
+  private lastFetched = 0;
+
   constructor() {
     if (isPlatformBrowser(this.platformId) && this._CookieService.get('token')) {
       this.refreshCart();
     }
   }
 
-  refreshCart(): void {
+  refreshCart(force = false): void {
     if (!isPlatformBrowser(this.platformId) || !this._CookieService.get('token')) {
       this.resetState();
       return;
     }
-    this.GetLoggedUserCart().subscribe({
+    const now = Date.now();
+    // Cache for 20 seconds unless forced, avoiding excessive API hammering on route switches
+    if (!force && this.cartId() && (now - this.lastFetched < 20000)) {
+      return;
+    }
+    if (this.isRefreshing) {
+      return;
+    }
+    this.isRefreshing = true;
+    this.GetLoggedUserCart(true).subscribe({
       next: (res) => {
+        this.isRefreshing = false;
+        this.lastFetched = Date.now();
         if (res?.data) {
           this.cartCount.set(res.numOfCartItems ?? res.data.products?.length ?? 0);
           this.cartTotal.set(res.data.totalCartPrice ?? 0);
@@ -38,7 +52,7 @@ export class CartService {
         }
       },
       error: () => {
-        this.resetState();
+        this.isRefreshing = false;
       }
     });
   }
@@ -47,15 +61,18 @@ export class CartService {
     this.cartCount.set(0);
     this.cartTotal.set(0);
     this.cartId.set('');
+    this.lastFetched = 0;
   }
 
-  GetLoggedUserCart(): Observable<any> {
-    return this._HttpClient.get(`${environment.baseURL}/api/v1/cart`).pipe(
+  GetLoggedUserCart(silent = false): Observable<any> {
+    const headers = silent ? { 'X-Silent-Error': 'true' } : undefined;
+    return this._HttpClient.get(`${environment.baseURL}/api/v1/cart`, { headers }).pipe(
       tap((res: any) => {
         if (res?.data) {
           this.cartCount.set(res.numOfCartItems ?? res.data.products?.length ?? 0);
           this.cartTotal.set(res.data.totalCartPrice ?? 0);
           this.cartId.set(res.cartId ?? res.data._id ?? '');
+          this.lastFetched = Date.now();
         }
       })
     );

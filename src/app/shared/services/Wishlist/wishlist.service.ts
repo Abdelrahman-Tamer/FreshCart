@@ -21,19 +21,33 @@ export class WishlistService {
   private wishlistItemsSubject = new BehaviorSubject<string[]>([]);
   readonly wishlistItems$ = this.wishlistItemsSubject.asObservable();
 
+  private isRefreshing = false;
+  private lastFetched = 0;
+
   constructor() {
     if (isPlatformBrowser(this.platformId) && this._CookieService.get('token')) {
       this.refreshWishlist();
     }
   }
 
-  refreshWishlist(): void {
+  refreshWishlist(force = false): void {
     if (!isPlatformBrowser(this.platformId) || !this._CookieService.get('token')) {
       this.resetState();
       return;
     }
-    this.getUserWishlist().subscribe({
+    const now = Date.now();
+    // Cache for 20 seconds unless forced, avoiding excessive API hammering on route switches
+    if (!force && this.wishlistIds().size > 0 && (now - this.lastFetched < 20000)) {
+      return;
+    }
+    if (this.isRefreshing) {
+      return;
+    }
+    this.isRefreshing = true;
+    this.getUserWishlist(true).subscribe({
       next: (res) => {
+        this.isRefreshing = false;
+        this.lastFetched = Date.now();
         if (res?.data) {
           const ids = new Set<string>(res.data.map((item: any) => item._id || item.id));
           this.wishlistIds.set(ids);
@@ -41,7 +55,7 @@ export class WishlistService {
         }
       },
       error: () => {
-        this.resetState();
+        this.isRefreshing = false;
       }
     });
   }
@@ -49,15 +63,18 @@ export class WishlistService {
   resetState(): void {
     this.wishlistIds.set(new Set());
     this.wishlistItemsSubject.next([]);
+    this.lastFetched = 0;
   }
 
-  getUserWishlist(): Observable<any> {
-    return this._HttpClient.get(`${environment.baseURL}/api/v1/wishlist`).pipe(
+  getUserWishlist(silent = false): Observable<any> {
+    const headers = silent ? { 'X-Silent-Error': 'true' } : undefined;
+    return this._HttpClient.get(`${environment.baseURL}/api/v1/wishlist`, { headers }).pipe(
       tap((res: any) => {
         if (res?.data) {
           const ids = new Set<string>(res.data.map((item: any) => item._id || item.id));
           this.wishlistIds.set(ids);
           this.wishlistItemsSubject.next(Array.from(ids));
+          this.lastFetched = Date.now();
         }
       })
     );
@@ -69,6 +86,7 @@ export class WishlistService {
         const idList: string[] = res?.data || [...Array.from(this.wishlistIds()), productId];
         this.wishlistIds.set(new Set(idList));
         this.wishlistItemsSubject.next(idList);
+        this.lastFetched = Date.now();
       })
     );
   }
@@ -79,6 +97,7 @@ export class WishlistService {
         const idList: string[] = res?.data || Array.from(this.wishlistIds()).filter(id => id !== productId);
         this.wishlistIds.set(new Set(idList));
         this.wishlistItemsSubject.next(idList);
+        this.lastFetched = Date.now();
       })
     );
   }
