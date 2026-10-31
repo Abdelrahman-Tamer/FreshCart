@@ -50,6 +50,7 @@ export const routes: Routes = [
       },
 
       // Protected customer routes
+      { path: 'profile', loadComponent: () => import('./features/components/profile/profile.component').then((c) => c.ProfileComponent), canActivate: [authGuard], title: 'FreshCart - My Profile' },
       { path: 'cart', component: CartComponent, canActivate: [authGuard], title: 'FreshCart - Shopping Cart' },
       { path: 'wishlist', component: WishlistComponent, canActivate: [authGuard], title: 'FreshCart - My Wishlist' },
       { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard], title: 'FreshCart - Checkout' },
