@@ -258,10 +258,10 @@ export class ProfileComponent implements OnInit {
     this.isDetectingLocation = false;
   }
 
-  // GPS Geolocation Support
+  // GPS & Network Geolocation Support
   useCurrentLocation(): void {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
-      this.locationError = 'Geolocation is not supported by your current browser.';
+      this.detectLocationByIp();
       return;
     }
 
@@ -274,27 +274,47 @@ export class ProfileComponent implements OnInit {
         this.reverseGeocode(latitude, longitude);
       },
       (error) => {
-        this.isDetectingLocation = false;
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            this.locationError = 'Location access was denied. You can still enter your address manually below.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            this.locationError = 'GPS location is currently unavailable on your device.';
-            break;
-          case error.TIMEOUT:
-            this.locationError = 'Location request timed out. Please enter your address details manually.';
-            break;
-          default:
-            this.locationError = 'Unable to determine your location. Please enter manually.';
-            break;
+        if (error.code === error.PERMISSION_DENIED) {
+          this.isDetectingLocation = false;
+          this.locationError = 'Location access was denied. You can enter your address details manually below.';
+          return;
         }
+        // If timeout or hardware unavailable (common on PCs/laptops without GPS chip), seamlessly fallback to IP location
+        this.detectLocationByIp();
       },
-      { timeout: 10000, enableHighAccuracy: true }
+      // enableHighAccuracy: false ensures standard Wi-Fi/IP location without waiting for non-existent GPS chips
+      { timeout: 7000, enableHighAccuracy: false, maximumAge: 300000 }
     );
   }
 
-  private reverseGeocode(lat: number, lon: number): void {
+  private detectLocationByIp(): void {
+    this.isDetectingLocation = true;
+    fetch('https://ipwho.is/')
+      .then((res) => {
+        if (!res.ok) throw new Error('IP service error');
+        return res.json();
+      })
+      .then((data) => {
+        if (!data || !data.success) throw new Error('IP lookup failed');
+
+        if (data.latitude && data.longitude) {
+          this.reverseGeocode(data.latitude, data.longitude, true);
+        } else {
+          this.isDetectingLocation = false;
+          const detectedCity = this.matchCity(data.city || data.region || '');
+          if (detectedCity) {
+            this.newAddressForm.patchValue({ city: detectedCity });
+          }
+          this._Toastr.info('City detected from network. Please enter your street address details.', 'Location Detected');
+        }
+      })
+      .catch(() => {
+        this.isDetectingLocation = false;
+        this.locationError = 'Could not detect your location automatically. Please enter your address details manually.';
+      });
+  }
+
+  private reverseGeocode(lat: number, lon: number, isFallback = false): void {
     const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
     fetch(url, { headers: { Accept: 'application/json' } })
       .then((res) => {
@@ -320,18 +340,58 @@ export class ProfileComponent implements OnInit {
           this.newAddressForm.patchValue({ details: readableDetails });
         }
 
-        const detectedCity = (addr.city || addr.state || addr.governorate || addr.town || addr.county || '').toLowerCase();
-        const matchedCity = this.cities.find((c) => detectedCity.includes(c.toLowerCase()));
+        const rawCity = addr.city || addr.state || addr.governorate || addr.town || addr.county || '';
+        const matchedCity = this.matchCity(rawCity);
         if (matchedCity) {
           this.newAddressForm.patchValue({ city: matchedCity });
         }
 
-        this._Toastr.info('Detected location details filled. Please review and adjust before saving.', 'Location Detected');
+        const msg = isFallback
+          ? 'Approximate location detected via network. Please review your street details.'
+          : 'Detected location details filled. Please review and adjust before saving.';
+        this._Toastr.info(msg, 'Location Detected');
       })
       .catch(() => {
         this.isDetectingLocation = false;
-        this.locationError = 'Could not lookup address name for your location. Please enter street details manually.';
+        this.locationError = 'Could not lookup exact street address. Please enter details manually.';
       });
+  }
+
+  private matchCity(cityName: string): string | null {
+    if (!cityName) return null;
+    const lower = cityName.toLowerCase();
+
+    // 1. Direct english match
+    const direct = this.cities.find((c) => lower.includes(c.toLowerCase()));
+    if (direct) return direct;
+
+    // 2. Arabic name mappings
+    const arabicMap: { [key: string]: string } = {
+      'قاهرة': 'Cairo',
+      'جيزة': 'Giza',
+      'إسكندرية': 'Alexandria',
+      'اسكندرية': 'Alexandria',
+      'منصورة': 'Mansoura',
+      'طنطا': 'Tanta',
+      'بورسعيد': 'Port Said',
+      'سويس': 'Suez',
+      'إسماعيلية': 'Ismailia',
+      'اسماعيلية': 'Ismailia',
+      'أسيوط': 'Assiut',
+      'اسيوط': 'Assiut',
+      'أقصر': 'Luxor',
+      'اقصر': 'Luxor',
+      'أسوان': 'Aswan',
+      'اسوان': 'Aswan',
+      'غردقة': 'Hurghada',
+      'شرم': 'Sharm El Sheikh'
+    };
+
+    for (const [ar, en] of Object.entries(arabicMap)) {
+      if (cityName.includes(ar)) return en;
+    }
+
+    return null;
   }
 
   onAddAddress(): void {
