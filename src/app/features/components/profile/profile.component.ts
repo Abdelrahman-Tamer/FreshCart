@@ -340,34 +340,35 @@ export class ProfileComponent implements OnInit, OnDestroy {
       this.map = L.map(mapElement, {
         center: [defaultLat, defaultLng],
         zoom: defaultZoom,
-        zoomControl: true
+        zoomControl: true,
+        attributionControl: false
       });
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 19,
-        attribution: '&copy; OpenStreetMap'
+        maxZoom: 19
       }).addTo(this.map);
 
-      // Custom crisp emerald location marker
+      // Sharp, mathematically anchored drop-pin (Tip at 18px X, 44px Y)
+      // Zero transform offset ensures pin stays 100% frozen to exact coordinate when zooming
       const pinIcon = L.divIcon({
-        className: 'freshcart-map-marker',
+        className: 'freshcart-map-pin',
         html: `
-          <div style="transform: translate(-50%, -100%); position: relative;">
-            <div style="background-color: #059669; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(5,150,105,0.45); border: 2.5px solid #ffffff;">
-              <svg style="width: 18px; height: 18px; color: #ffffff;" fill="currentColor" viewBox="0 0 20 20">
-                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-              </svg>
-            </div>
-            <div style="width: 12px; height: 4px; background: rgba(0,0,0,0.35); border-radius: 50%; filter: blur(1px); margin: 2px auto 0;"></div>
+          <div style="width: 36px; height: 44px; position: relative;">
+            <svg width="36" height="44" viewBox="0 0 36 44" fill="none" style="filter: drop-shadow(0 3px 6px rgba(0,0,0,0.38));">
+              <path d="M18 0C8.06 0 0 8.06 0 18C0 29.5 16 42.5 17.2 43.6C17.65 44 18.35 44 18.8 43.6C20 42.5 36 29.5 36 18C36 8.06 27.94 0 18 0Z" fill="#059669"/>
+              <circle cx="18" cy="18" r="7.5" fill="#ffffff"/>
+              <circle cx="18" cy="18" r="3.8" fill="#059669"/>
+            </svg>
           </div>
         `,
-        iconSize: [34, 34],
-        iconAnchor: [17, 34]
+        iconSize: [36, 44],
+        iconAnchor: [18, 44]
       });
 
+      // Marker is non-draggable so dragging/zooming map never displaces the user's location accidentally
       this.marker = L.marker([defaultLat, defaultLng], {
         icon: pinIcon,
-        draggable: true
+        draggable: false
       }).addTo(this.map);
 
       // Listen to marker dragend to update address details

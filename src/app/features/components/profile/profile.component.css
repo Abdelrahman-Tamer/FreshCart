@@ -39,3 +39,14 @@
   font-family: inherit;
   z-index: 1 !important;
 }
+
+/* Hide OpenStreetMap / Leaflet technical attribution banner */
+.leaflet-control-attribution {
+  display: none !important;
+}
+
+/* Crisp anchor for map pin without unwanted borders */
+.freshcart-map-pin {
+  background: transparent !important;
+  border: none !important;
+}

@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { CartService } from '../../../shared/services/Cart/cart.service';
 import { PaymentService } from '../../../shared/services/Payment/payment.service';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
+import { ProfileService, UserAddress } from '../../services/profile/profile.service';
 import { ICart } from '../../../core/interfaces/icart.interface';
 import { CommonModule } from '@angular/common';
 import { ToastrService } from 'ngx-toastr';
@@ -20,6 +21,7 @@ export class CheckoutComponent implements OnInit {
   private readonly _FormBuilder = inject(FormBuilder);
   private readonly _CartService = inject(CartService);
   private readonly _PaymentService = inject(PaymentService);
+  private readonly _ProfileService = inject(ProfileService);
   private readonly _AuthService = inject(AuthService);
   private readonly _Router = inject(Router);
   private readonly _ActivatedRoute = inject(ActivatedRoute);
@@ -30,20 +32,63 @@ export class CheckoutComponent implements OnInit {
   isProcessingPayment = false;
   paymentMethod = 'cash'; // 'cash' or 'online'
 
+  // Saved Addresses State
+  savedAddresses: UserAddress[] = [];
+  selectedAddressId: string = 'new';
+  isLoadingAddresses = false;
+
   checkoutForm: FormGroup = this._FormBuilder.group({
-    details: [null, [Validators.required, Validators.minLength(10)]],
+    details: [null, [Validators.required, Validators.minLength(5)]],
     phone: [null, [Validators.required, Validators.pattern(/^(\+2)?01[0125][0-9]{8}$/)]],
     city: [null, [Validators.required, Validators.minLength(2)]]
   });
 
   ngOnInit(): void {
     this.loadCartData();
+    this.loadSavedAddresses();
     
     // Check if user returned from canceled payment
     this._ActivatedRoute.queryParams.subscribe(params => {
       if (params['canceled'] === 'true') {
         this._ToastrService.warning('Payment was canceled. You can try again.', 'Payment Canceled');
       }
+    });
+  }
+
+  loadSavedAddresses(): void {
+    if (!this._AuthService.isAuthenticated()) return;
+    this.isLoadingAddresses = true;
+    this._ProfileService.getUserAddresses().subscribe({
+      next: (res) => {
+        this.isLoadingAddresses = false;
+        this.savedAddresses = res?.data || [];
+        if (this.savedAddresses.length > 0) {
+          // Auto-select first saved address for quick 1-click checkout
+          this.selectSavedAddress(this.savedAddresses[0]);
+        }
+      },
+      error: () => {
+        this.isLoadingAddresses = false;
+      }
+    });
+  }
+
+  selectSavedAddress(addr: UserAddress): void {
+    this.selectedAddressId = addr._id || 'saved';
+    this.checkoutForm.patchValue({
+      details: addr.details,
+      phone: addr.phone,
+      city: addr.city
+    });
+    this.checkoutForm.markAsDirty();
+  }
+
+  selectNewAddressOption(): void {
+    this.selectedAddressId = 'new';
+    this.checkoutForm.reset({
+      details: '',
+      phone: '',
+      city: ''
     });
   }
 

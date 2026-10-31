@@ -811,18 +811,41 @@
               <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
               </svg>
-              <span>Pinpoint Location on Map</span>
+              <span>Delivery Pinpoint Map</span>
             </span>
-            <span class="text-[11px] text-neutral-400 font-normal">Click or drag pin to adjust</span>
+            <span class="text-[11px] text-neutral-400 font-normal">Click map or tap target to position pin</span>
           </div>
 
-          <div id="address-map" class="w-full h-44 sm:h-48 rounded-xl border border-neutral-200 overflow-hidden shadow-inner relative z-0 bg-slate-100">
-            <div class="h-full w-full flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center pointer-events-none">
-              <svg class="w-6 h-6 animate-pulse text-emerald-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
-              </svg>
-              <span class="text-xs font-medium text-slate-500">Loading interactive map...</span>
+          <div class="relative w-full rounded-xl overflow-hidden shadow-inner border border-neutral-200">
+            <div id="address-map" class="w-full h-48 sm:h-52 relative z-0 bg-slate-100">
+              <div class="h-full w-full flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center pointer-events-none">
+                <svg class="w-6 h-6 animate-pulse text-emerald-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+                </svg>
+                <span class="text-xs font-medium text-slate-500">Loading interactive map...</span>
+              </div>
             </div>
+
+            <!-- Floating Target / Locate Me Button directly on Map -->
+            <button 
+              type="button" 
+              (click)="useCurrentLocation()" 
+              [disabled]="isDetectingLocation"
+              class="absolute top-2.5 right-2.5 z-20 w-9 h-9 rounded-xl bg-white/95 hover:bg-white text-slate-700 hover:text-emerald-700 shadow-md border border-slate-200/90 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer disabled:opacity-60"
+              title="Pinpoint my exact GPS location on map"
+              aria-label="Pinpoint my exact GPS location on map">
+              @if (isDetectingLocation) {
+                <svg class="w-4 h-4 text-emerald-600 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              } @else {
+                <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="3" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 2v3m0 14v3M2 12h3m14 0h3M19.07 4.93l-2.12 2.12m-9.9 9.9l-2.12 2.12m12.02 0l-2.12-2.12m-9.9-9.9L4.93 4.93"/>
+                </svg>
+              }
+            </button>
           </div>
 
           @if (currentCoords) {
