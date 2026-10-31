@@ -254,85 +254,74 @@
         }
       </form>
 
-      <!-- Navigation Links List -->
-      <nav class="space-y-1" aria-label="Mobile Navigation">
-        <a routerLink="/home" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-          class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-          <span class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+      <!-- Mobile Quick Navigation Grid (Icon-First, Compact & Modern) -->
+      <nav class="grid grid-cols-3 gap-2 py-1" aria-label="Mobile Navigation">
+        <!-- Home -->
+        <a routerLink="/home" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+          class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+          <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
             </svg>
-            <span>Home</span>
-          </span>
-          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
+          </div>
+          <span class="text-xs font-semibold">Home</span>
         </a>
 
-        <a routerLink="/products" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-          class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-          <span class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- Products -->
+        <a routerLink="/products" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+          class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+          <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
             </svg>
-            <span>All Products</span>
-          </span>
-          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
+          </div>
+          <span class="text-xs font-semibold">Products</span>
         </a>
 
-        <a routerLink="/categories" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-          class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-          <span class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- Categories -->
+        <a routerLink="/categories" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+          class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+          <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
             </svg>
-            <span>Categories</span>
-          </span>
-          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
+          </div>
+          <span class="text-xs font-semibold">Categories</span>
         </a>
 
-        <a routerLink="/brands" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-          class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-          <span class="flex items-center gap-3">
-            <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <!-- Brands -->
+        <a routerLink="/brands" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+          class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+          <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M9.568 3H5.25A2.25 2.25 0 003 5.25v4.318c0 .597.237 1.17.659 1.591l9.581 9.581c.699.699 1.78.871 2.656.402l4.869-2.6a2.25 2.25 0 001.077-1.465l1.096-5.48a2.25 2.25 0 00-.598-2.023l-9.58-9.581A2.25 2.25 0 0010.96 3h-1.392z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M6 6h.008v.008H6V6z" />
             </svg>
-            <span>Brands</span>
-          </span>
-          <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-          </svg>
+          </div>
+          <span class="text-xs font-semibold">Brands</span>
         </a>
 
         @if (isLoggedIn) {
-          <a routerLink="/profile" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-            class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-            <span class="flex items-center gap-3">
-              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-              </svg>
-              <span>My Profile</span>
-            </span>
-            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-            </svg>
-          </a>
-          <a routerLink="/orders" (click)="isMobileMenuOpen = false" routerLinkActive="text-emerald-700 bg-emerald-50 font-semibold"
-            class="flex items-center justify-between px-3.5 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-50 hover:text-emerald-600 transition-colors">
-            <span class="flex items-center gap-3">
-              <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <!-- Orders -->
+          <a routerLink="/orders" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+            class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+            <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span>My Orders</span>
-            </span>
-            <svg class="w-3.5 h-3.5 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-            </svg>
+            </div>
+            <span class="text-xs font-semibold">Orders</span>
+          </a>
+
+          <!-- Profile -->
+          <a routerLink="/profile" (click)="isMobileMenuOpen = false" routerLinkActive="bg-emerald-50 text-emerald-700 ring-1 ring-emerald-600/30"
+            class="flex flex-col items-center justify-center p-3 rounded-2xl bg-slate-50/80 hover:bg-slate-100 text-slate-700 transition-all group">
+            <div class="w-9 h-9 rounded-xl bg-white shadow-2xs flex items-center justify-center text-slate-600 group-hover:text-emerald-600 transition-colors mb-1.5">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </div>
+            <span class="text-xs font-semibold">Profile</span>
           </a>
         }
       </nav>

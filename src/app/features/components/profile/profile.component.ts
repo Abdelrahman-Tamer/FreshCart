@@ -37,6 +37,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   currentCoords: { lat: number; lng: number } | null = null;
   private map: any = null;
   private marker: any = null;
+  private mapResizeObserver: any = null;
 
   // Feedback alerts
   passwordErrorMessage: string | null = null;
@@ -83,9 +84,11 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }, { validators: this.passwordMatchValidator });
 
   cities = [
-    'Cairo', 'Giza', 'Alexandria', 'Mansoura', 'Tanta',
-    'Port Said', 'Suez', 'Ismailia', 'Assiut', 'Luxor',
-    'Aswan', 'Hurghada', 'Sharm El Sheikh'
+    'Cairo', 'Giza', 'Alexandria', 'Qalyubia', 'Mansoura', 'Tanta',
+    'Sharqia', 'Menofia', 'Damietta', 'Port Said', 'Suez', 'Ismailia',
+    'Kafr El-Sheikh', 'Beheira', 'Fayoum', 'Beni Suef', 'Minya',
+    'Assiut', 'Sohag', 'Qena', 'Luxor', 'Aswan', 'Hurghada',
+    'Sharm El Sheikh', 'Marsa Matrouh'
   ];
 
   ngOnInit(): void {
@@ -284,6 +287,10 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   private destroyMap(): void {
+    if (this.mapResizeObserver) {
+      this.mapResizeObserver.disconnect();
+      this.mapResizeObserver = null;
+    }
     if (this.map) {
       this.map.remove();
       this.map = null;
@@ -292,13 +299,29 @@ export class ProfileComponent implements OnInit, OnDestroy {
   }
 
   // Interactive Leaflet Map initialization (Browser-only, SSR-safe)
-  private async initInteractiveMap(): Promise<void> {
+  private async initInteractiveMap(retryCount = 0): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
 
     const mapElement = document.getElementById('address-map');
-    if (!mapElement) return;
+    if (!mapElement) {
+      if (retryCount < 10) {
+        setTimeout(() => this.initInteractiveMap(retryCount + 1), 75);
+      }
+      return;
+    }
+
+    // Wait until element has geometry before initializing
+    if (mapElement.clientHeight === 0 && retryCount < 10) {
+      setTimeout(() => this.initInteractiveMap(retryCount + 1), 75);
+      return;
+    }
 
     this.destroyMap();
+
+    // Clean up any stale Leaflet id
+    if ((mapElement as any)._leaflet_id) {
+      delete (mapElement as any)._leaflet_id;
+    }
 
     try {
       const L = await import('leaflet');
@@ -355,11 +378,17 @@ export class ProfileComponent implements OnInit, OnDestroy {
         this.reverseGeocode(latlng.lat, latlng.lng);
       });
 
-      setTimeout(() => {
-        if (this.map) {
-          this.map.invalidateSize();
-        }
-      }, 250);
+      // Automatic resize observation to prevent grey tiles
+      if (typeof window !== 'undefined' && 'ResizeObserver' in window) {
+        this.mapResizeObserver = new ResizeObserver(() => {
+          this.map?.invalidateSize();
+        });
+        this.mapResizeObserver.observe(mapElement);
+      }
+
+      setTimeout(() => this.map?.invalidateSize(), 100);
+      setTimeout(() => this.map?.invalidateSize(), 300);
+      setTimeout(() => this.map?.invalidateSize(), 600);
     } catch {
       // Graceful fallback if map cannot load
     }
@@ -430,8 +459,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
           this.applyDetectedLocation(data.latitude, data.longitude, true);
         } else {
           this.isDetectingLocation = false;
-          const detectedCity = this.matchCity(data.city || data.region || '');
+          const detectedCity = this.resolveCityAndGovernorate({
+            address: { state: data.region, city: data.city },
+            display_name: `${data.city || ''}, ${data.region || ''}`
+          });
           if (detectedCity) {
+            if (!this.cities.includes(detectedCity)) {
+              this.cities.push(detectedCity);
+            }
             this.newAddressForm.patchValue({ city: detectedCity });
           }
           this._Toastr.info('City detected from network. Please tap your exact location on the map.', 'Location Detected');
@@ -455,29 +490,38 @@ export class ProfileComponent implements OnInit, OnDestroy {
         const addr = data?.address || {};
 
         const streetParts = [
-          addr.house_number,
+          addr.house_number ? `Bldg ${addr.house_number}` : '',
           addr.road,
-          addr.suburb || addr.neighbourhood || addr.quarter,
-          addr.city_district
+          addr.neighbourhood,
+          addr.suburb || addr.quarter,
+          addr.city_district || addr.district
         ].filter(Boolean);
 
-        const readableDetails = streetParts.length > 0
+        let readableDetails = streetParts.length > 0
           ? streetParts.join(', ')
           : (data?.display_name?.split(',').slice(0, 3).join(', ') || '');
+
+        if (readableDetails.length > 95) {
+          readableDetails = readableDetails.slice(0, 95).trim();
+        }
 
         if (readableDetails) {
           this.newAddressForm.patchValue({ details: readableDetails });
         }
 
-        const rawCity = addr.city || addr.state || addr.governorate || addr.town || addr.county || '';
-        const matchedCity = this.matchCity(rawCity);
-        if (matchedCity) {
-          this.newAddressForm.patchValue({ city: matchedCity });
+        // Accurately resolve City / Governorate from map data
+        const resolvedCity = this.resolveCityAndGovernorate(data);
+        if (resolvedCity) {
+          if (!this.cities.includes(resolvedCity)) {
+            this.cities.push(resolvedCity);
+          }
+          this.newAddressForm.patchValue({ city: resolvedCity });
         }
 
+        const cityLabel = resolvedCity ? ` in ${resolvedCity}` : '';
         const msg = isFallback
-          ? 'Approximate location detected via network. Please adjust pin on map if needed.'
-          : 'Exact location pinned on map and address details filled!';
+          ? `Approximate location detected${cityLabel}. Please adjust pin on map if needed.`
+          : `Exact location pinned${cityLabel} and address details filled!`;
         this._Toastr.info(msg, 'Location Pinned');
       })
       .catch(() => {
@@ -486,39 +530,188 @@ export class ProfileComponent implements OnInit, OnDestroy {
       });
   }
 
-  private matchCity(cityName: string): string | null {
-    if (!cityName) return null;
-    const lower = cityName.toLowerCase();
+  private resolveCityAndGovernorate(data: any): string | null {
+    if (!data) return null;
+    const addr = data.address || {};
 
-    // 1. Direct english match
-    const direct = this.cities.find((c) => lower.includes(c.toLowerCase()));
-    if (direct) return direct;
-
-    // 2. Arabic name mappings
-    const arabicMap: { [key: string]: string } = {
-      'قاهرة': 'Cairo',
-      'جيزة': 'Giza',
-      'إسكندرية': 'Alexandria',
-      'اسكندرية': 'Alexandria',
-      'منصورة': 'Mansoura',
-      'طنطا': 'Tanta',
-      'بورسعيد': 'Port Said',
-      'سويس': 'Suez',
-      'إسماعيلية': 'Ismailia',
-      'اسماعيلية': 'Ismailia',
-      'أسيوط': 'Assiut',
-      'اسيوط': 'Assiut',
-      'أقصر': 'Luxor',
-      'اقصر': 'Luxor',
-      'أسوان': 'Aswan',
-      'اسوان': 'Aswan',
-      'غردقة': 'Hurghada',
-      'شرم': 'Sharm El Sheikh'
+    // 1. Official ISO 3166-2 Egyptian governorate code check
+    const isoCode = (addr['ISO3166-2-lvl4'] || addr['ISO3166-2'] || '').toUpperCase();
+    const isoMap: { [key: string]: string } = {
+      'EG-C': 'Cairo',
+      'EG-GZ': 'Giza',
+      'EG-ALX': 'Alexandria',
+      'EG-KB': 'Qalyubia',
+      'EG-DK': 'Mansoura',
+      'EG-GH': 'Tanta',
+      'EG-SHR': 'Sharqia',
+      'EG-MNF': 'Menofia',
+      'EG-PTS': 'Port Said',
+      'EG-SUZ': 'Suez',
+      'EG-IS': 'Ismailia',
+      'EG-KFS': 'Kafr El-Sheikh',
+      'EG-DT': 'Damietta',
+      'EG-BH': 'Beheira',
+      'EG-FYM': 'Fayoum',
+      'EG-BNS': 'Beni Suef',
+      'EG-MN': 'Minya',
+      'EG-AST': 'Assiut',
+      'EG-SHG': 'Sohag',
+      'EG-KN': 'Qena',
+      'EG-LX': 'Luxor',
+      'EG-ASN': 'Aswan',
+      'EG-BA': 'Hurghada',
+      'EG-JS': 'Sharm El Sheikh',
+      'EG-SIN': 'North Sinai',
+      'EG-MT': 'Marsa Matrouh',
+      'EG-WAD': 'New Valley'
     };
-
-    for (const [ar, en] of Object.entries(arabicMap)) {
-      if (cityName.includes(ar)) return en;
+    if (isoMap[isoCode]) {
+      return isoMap[isoCode];
     }
+
+    // 2. Aggregate all location text into lower-cased search string
+    const fieldsToSearch = [
+      addr.state,
+      addr.governorate,
+      addr.city,
+      addr.town,
+      addr.village,
+      addr.county,
+      addr.suburb,
+      addr.neighbourhood,
+      data.display_name
+    ].filter(Boolean).join(' ').toLowerCase();
+
+    // 3. Known city and governorate patterns (Arabic & English)
+    const governorateMappings: Array<{ matches: string[]; result: string }> = [
+      {
+        result: 'Cairo',
+        matches: [
+          'cairo', 'qahirah', 'قاهرة', 'مدينة نصر', 'nasr city', 'مصر الجديدة', 'heliopolis',
+          'المعادي', 'معادي', 'maadi', 'التجمع', 'تجمع', 'tagamoa', 'new cairo', 'القاهرة الجديدة',
+          'الرحاب', 'رحاب', 'rehab', 'مدينتي', 'madinaty', 'الشروق', 'شروق', 'shorouk',
+          'بدر', 'badr', 'حلوان', 'helwan', 'المقطم', 'مقطم', 'mokattam', 'الزمالك', 'زمالك',
+          'zamalek', 'وسط البلد', 'downtown', 'العباسية', 'عباسية', 'abbasiya', 'عين شمس',
+          'ain shams', 'شبرا', 'shubra', 'المرج', 'مرج', 'المطرية', 'مطرية', 'روض الفرج'
+        ]
+      },
+      {
+        result: 'Giza',
+        matches: [
+          'giza', 'jizah', 'جيزة', 'الجيزة', 'سادس من اكتوبر', 'سادس من أكتوبر', '6th of october',
+          'october city', 'مدينة 6 أكتوبر', 'الشيخ زايد', 'شيخ زايد', 'sheikh zayed', 'zayed',
+          'الدقي', 'دقي', 'dokki', 'المهندسين', 'مهندسين', 'mohandessin', 'العجوزة', 'عجوزة',
+          'agouza', 'الهرم', 'هرم', 'haram', 'فيصل', 'faisal', 'إمبابة', 'امبابة', 'imbaba',
+          'العمرانية', 'عمرانية', 'الوراق', 'وراق', 'الحوامدية', 'حوامدية', 'البدرشين', 'بدرشين', 'أوسيم'
+        ]
+      },
+      {
+        result: 'Alexandria',
+        matches: [
+          'alexandria', 'iskandariyah', 'إسكندرية', 'اسكندرية', 'الإسكندرية', 'سموحة', 'smouha',
+          'سيدي جابر', 'sidi gaber', 'المنتزه', 'منتزه', 'montaza', 'العجمي', 'عجمي', 'agami',
+          'ميامي', 'miami', 'محطة الرمل', 'رمل', 'الإبراهيمية', 'ابراهيمية', 'برج العرب', 'borg el arab'
+        ]
+      },
+      {
+        result: 'Qalyubia',
+        matches: ['qalyubia', 'kalyobia', 'قليوبية', 'القليوبية', 'بنها', 'banha', 'شبرا الخيمة', 'قليوب', 'العبور', 'طوخ', 'قها']
+      },
+      {
+        result: 'Mansoura',
+        matches: ['mansoura', 'dakahlia', 'دقهلية', 'الدقهلية', 'منصورة', 'المنصورة', 'ميت غمر', 'طلخا', 'بلقاس', 'سنبلاوين']
+      },
+      {
+        result: 'Tanta',
+        matches: ['tanta', 'gharbia', 'غربية', 'الغربية', 'طنطا', 'المحلة', 'محلة', 'mahalla', 'زفتى', 'كفر الزيات']
+      },
+      {
+        result: 'Sharqia',
+        matches: ['sharqia', 'sharkia', 'شرقية', 'الشرقية', 'الزقازيق', 'زقازيق', 'zagazig', 'عاشر من رمضان', '10th of ramadan', 'بلبيس', 'فاقوس']
+      },
+      {
+        result: 'Menofia',
+        matches: ['menofia', 'monufia', 'منوفية', 'المنوفية', 'شبين الكوم', 'shibin', 'السادات', 'منوف', 'أشمون', 'قويسنا']
+      },
+      {
+        result: 'Port Said',
+        matches: ['port said', 'بورسعيد', 'بور سعيد', 'بورفؤاد']
+      },
+      {
+        result: 'Suez',
+        matches: ['suez', 'سويس', 'السويس', 'عين سخنة', 'sokhna']
+      },
+      {
+        result: 'Ismailia',
+        matches: ['ismailia', 'إسماعيلية', 'اسماعيلية', 'الإسماعيلية', 'فايد', 'القنطرة']
+      },
+      {
+        result: 'Damietta',
+        matches: ['damietta', 'دمياط', 'رأس البر', 'ras el bar']
+      },
+      {
+        result: 'Kafr El-Sheikh',
+        matches: ['kafr el-sheikh', 'kafr el sheikh', 'كفر الشيخ', 'دسوق']
+      },
+      {
+        result: 'Beheira',
+        matches: ['beheira', 'بحيرة', 'البحيرة', 'دمنهور', 'damanhour', 'كفر الدوار', 'إدكو', 'رشيد']
+      },
+      {
+        result: 'Fayoum',
+        matches: ['fayoum', 'faiyum', 'فيوم', 'الفيوم']
+      },
+      {
+        result: 'Beni Suef',
+        matches: ['beni suef', 'بني سويف', 'الواسطى']
+      },
+      {
+        result: 'Minya',
+        matches: ['minya', 'منيا', 'المنيا', 'ملوي', 'مغاغة']
+      },
+      {
+        result: 'Assiut',
+        matches: ['assiut', 'asyut', 'أسيوط', 'اسيوط', 'ديروط', 'منفلوط']
+      },
+      {
+        result: 'Sohag',
+        matches: ['sohag', 'سوهاج', 'طهطا', 'جرجا']
+      },
+      {
+        result: 'Qena',
+        matches: ['qena', 'قنا', 'نجع حمادي', 'قوص']
+      },
+      {
+        result: 'Luxor',
+        matches: ['luxor', 'أقصر', 'اقصر', 'الأقصر']
+      },
+      {
+        result: 'Aswan',
+        matches: ['aswan', 'أسوان', 'اسوان', 'إدفو', 'كوم أمبو']
+      },
+      {
+        result: 'Hurghada',
+        matches: ['hurghada', 'red sea', 'غردقة', 'الغردقة', 'بحر أحمر', 'البحر الأحمر', 'الجونة', 'gouna', 'مرسى علم']
+      },
+      {
+        result: 'Sharm El Sheikh',
+        matches: ['sharm', 'شرم', 'شرم الشيخ', 'south sinai', 'جنوب سيناء', 'دهب', 'dahab', 'نويبع']
+      },
+      {
+        result: 'Marsa Matrouh',
+        matches: ['matrouh', 'مطروح', 'مرسى مطروح', 'الساحل الشمالي', 'north coast', 'العلمين', 'alamein']
+      }
+    ];
+
+    for (const group of governorateMappings) {
+      if (group.matches.some(m => fieldsToSearch.includes(m))) {
+        return group.result;
+      }
+    }
+
+    // 4. Fallback: Check if raw state or city matches any in this.cities directly
+    const directMatch = this.cities.find(c => fieldsToSearch.includes(c.toLowerCase()));
+    if (directMatch) return directMatch;
 
     return null;
   }

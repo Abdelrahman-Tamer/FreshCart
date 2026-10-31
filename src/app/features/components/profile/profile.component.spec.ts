@@ -134,6 +134,40 @@ describe('ProfileComponent', () => {
     expect(component.isDetectingLocation).toBeDefined();
   });
 
+  it('should resolve Egyptian city and governorate accurately from map data', () => {
+    // 1. ISO code mapping
+    const cairoIso = (component as any).resolveCityAndGovernorate({
+      address: { 'ISO3166-2-lvl4': 'EG-C', state: 'القاهرة' }
+    });
+    expect(cairoIso).toBe('Cairo');
+
+    const gizaIso = (component as any).resolveCityAndGovernorate({
+      address: { 'ISO3166-2-lvl4': 'EG-GZ', state: 'الجيزة' }
+    });
+    expect(gizaIso).toBe('Giza');
+
+    // 2. New Cairo / Tagamoa mapping
+    const newCairo = (component as any).resolveCityAndGovernorate({
+      address: { road: 'شارع التسعين', suburb: 'التجمع الخامس', city: 'مدينة القاهرة الجديدة' },
+      display_name: 'التجمع الخامس, القاهرة الجديدة, مصر'
+    });
+    expect(newCairo).toBe('Cairo');
+
+    // 3. 6th of October / Zayed mapping to Giza
+    const octoberGiza = (component as any).resolveCityAndGovernorate({
+      address: { road: 'المحور المركزي', city: 'مدينة السادس من أكتوبر' },
+      display_name: 'السادس من أكتوبر, الجيزة, مصر'
+    });
+    expect(octoberGiza).toBe('Giza');
+
+    // 4. Alexandria district mapping
+    const alex = (component as any).resolveCityAndGovernorate({
+      address: { road: 'طريق الجيش', suburb: 'سموحة' },
+      display_name: 'سموحة, الإسكندرية, مصر'
+    });
+    expect(alex).toBe('Alexandria');
+  });
+
   it('should call updateProfile when edit form is valid', () => {
     component.editProfileForm.patchValue({
       name: 'Mohamed Tamer',

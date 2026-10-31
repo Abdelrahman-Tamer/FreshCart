@@ -269,10 +269,10 @@
             <div class="flex items-center gap-1">
               @for (page of [].constructor(totalPages); track $index) {
                 <button (click)="goToPage($index + 1)"
-                  [class.bg-emerald-600]="currentPage === $index + 1"
-                  [class.text-white]="currentPage === $index + 1"
-                  [class.border-emerald-600]="currentPage === $index + 1"
-                  class="w-9 h-9 text-xs font-semibold rounded-lg border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-colors">
+                  [ngClass]="currentPage === $index + 1 
+                    ? 'bg-emerald-100 text-slate-950 font-bold border-2 border-emerald-600 shadow-xs ring-2 ring-emerald-500/20' 
+                    : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50 font-medium'"
+                  class="w-9 h-9 text-xs rounded-lg transition-all flex items-center justify-center cursor-pointer">
                   {{ $index + 1 }}
                 </button>
               }

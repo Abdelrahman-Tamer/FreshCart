@@ -27,3 +27,15 @@
 .animate-scaleUp {
   animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
+
+#address-map {
+  min-height: 180px;
+  width: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.leaflet-container {
+  font-family: inherit;
+  z-index: 1 !important;
+}
