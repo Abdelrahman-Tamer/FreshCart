@@ -116,6 +116,50 @@ export class ProfileComponent implements OnInit {
     return /[^a-zA-Z\d]/.test(this.newPasswordVal);
   }
 
+  get passwordStrengthPercent(): number {
+    let score = 0;
+    if (this.hasMinLength) score += 20;
+    if (this.hasUpper) score += 20;
+    if (this.hasLower) score += 20;
+    if (this.hasNumber) score += 20;
+    if (this.hasSpecial) score += 20;
+    return score;
+  }
+
+  get passwordStrengthLabel(): string {
+    const p = this.passwordStrengthPercent;
+    if (p === 0) return 'Enter a password';
+    if (p <= 40) return 'Weak';
+    if (p <= 60) return 'Moderate';
+    if (p <= 80) return 'Good';
+    return 'Strong & Secure';
+  }
+
+  get passwordStrengthColor(): string {
+    const p = this.passwordStrengthPercent;
+    if (p <= 40) return 'bg-rose-500 text-rose-600';
+    if (p <= 60) return 'bg-amber-500 text-amber-600';
+    if (p <= 80) return 'bg-teal-500 text-teal-600';
+    return 'bg-emerald-500 text-emerald-600';
+  }
+
+  copiedId = false;
+
+  copyAccountId(id?: string): void {
+    if (!id) return;
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(id).then(() => {
+        this.copiedId = true;
+        this._Toastr.info('Account ID copied to clipboard', 'Copied!', { timeOut: 2000 });
+        setTimeout(() => this.copiedId = false, 2500);
+      }).catch(() => {});
+    }
+  }
+
+  setAddressLabelPreset(label: string): void {
+    this.newAddressForm.patchValue({ name: label });
+  }
+
   passwordMatchValidator(form: AbstractControl) {
     const pass = form.get('password')?.value;
     const rePass = form.get('rePassword')?.value;
