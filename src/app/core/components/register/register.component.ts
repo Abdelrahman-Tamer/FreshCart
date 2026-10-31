@@ -1,8 +1,9 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
   FormGroup,
+  FormsModule,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -10,23 +11,32 @@ import { AuthService } from '../../../shared/services/authentication/auth.servic
 import { Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { formatApiError } from '../../utils/error-handler';
+import { GoogleAuthService } from '../../services/google-auth.service';
+import { ToastrService } from 'ngx-toastr';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, CommonModule, RouterModule],
+  imports: [ReactiveFormsModule, FormsModule, CommonModule, RouterModule],
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent {
+export class RegisterComponent implements OnInit {
 
   private readonly _AuthService = inject(AuthService);
   private readonly _Router = inject(Router);
+  readonly googleAuth = inject(GoogleAuthService);
+  private readonly toastr = inject(ToastrService);
 
   isLoading = false;
+  isGoogleLoading = false;
+  isGoogleModalOpen = false;
   errorMessage = '';
   successMessage = '';
   showPassword = false;
   showRePassword = false;
+
+  customGoogleName = 'Mohamed Ali';
+  customGoogleEmail = 'mohamed.freshcart@gmail.com';
 
   registerForm: FormGroup = new FormGroup(
     {
@@ -50,6 +60,14 @@ export class RegisterComponent {
     { validators: this.confirm }
   );
 
+  ngOnInit(): void {
+    if (this.googleAuth.isConfigured) {
+      this.googleAuth.initGoogleId((credentialResponse) => {
+        this.onGoogleCredential(credentialResponse);
+      });
+    }
+  }
+
   confirm(myForm: AbstractControl) {
     const password = myForm.get('password')?.value;
     const rePassword = myForm.get('rePassword')?.value;
@@ -71,7 +89,6 @@ export class RegisterComponent {
   get rePasswordControl() { return this.registerForm.get('rePassword'); }
   get phoneControl() { return this.registerForm.get('phone'); }
 
-  // Password checklist helpers
   get passwordVal(): string {
     return this.passwordControl?.value || '';
   }
@@ -103,5 +120,54 @@ export class RegisterComponent {
     } else {
       this.registerForm.markAllAsTouched();
     }
+  }
+
+  handleGoogleSignUpClick(): void {
+    if (this.googleAuth.isConfigured) {
+      this.googleAuth.initGoogleId((credentialResponse) => {
+        this.onGoogleCredential(credentialResponse);
+      });
+    } else {
+      this.isGoogleModalOpen = true;
+    }
+  }
+
+  onGoogleCredential(credentialResponse: any): void {
+    if (credentialResponse?.credential) {
+      const profile = this.googleAuth.decodeGoogleCredential(credentialResponse.credential);
+      if (profile) {
+        this.authenticateWithGoogleProfile({
+          name: profile.name,
+          email: profile.email,
+          picture: profile.picture,
+          sub: profile.sub
+        });
+      }
+    }
+  }
+
+  authenticateWithGoogleProfile(profile: { name: string; email: string; picture?: string; sub: string }): void {
+    this.isGoogleLoading = true;
+    this.errorMessage = '';
+    this._AuthService.loginWithGoogle(profile).subscribe({
+      next: () => {
+        this.isGoogleLoading = false;
+        this.isGoogleModalOpen = false;
+        this.toastr.success(`Account ready! Signed in as ${profile.name}`, 'Google Sign-Up', {
+          timeOut: 2500,
+          closeButton: true,
+          progressBar: true
+        });
+        this._Router.navigateByUrl('/home');
+      },
+      error: () => {
+        this.isGoogleLoading = false;
+        this.errorMessage = 'Google authentication encountered an error. Please try again.';
+      }
+    });
+  }
+
+  closeGoogleModal(): void {
+    this.isGoogleModalOpen = false;
   }
 }

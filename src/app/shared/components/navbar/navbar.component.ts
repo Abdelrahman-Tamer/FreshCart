@@ -43,6 +43,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return this.userName.trim().split(/\s+/)[0];
   }
 
+  get userAvatar(): string {
+    return this._AuthService.userAvatar;
+  }
+
   ngOnInit(): void {
     this.subscription = this._AuthService.isLoggedIn.subscribe({
       next: (status) => {
