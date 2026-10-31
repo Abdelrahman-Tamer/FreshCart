@@ -130,9 +130,21 @@ export class LoginComponent implements OnInit, AfterViewInit {
         const returnUrl = this._ActivatedRoute.snapshot.queryParams['returnUrl'] || '/home';
         this._Router.navigateByUrl(returnUrl);
       },
-      error: () => {
+      error: (err: any) => {
         this.isGoogleLoading = false;
-        this.errorMessage = 'Google authentication encountered an error. Please try again.';
+        if (err?.code === 'ACCOUNT_EXISTS_WITH_PASSWORD') {
+          this.loginForm.patchValue({ email: err.email });
+          if (profile.picture) {
+            localStorage.setItem('user_avatar', profile.picture);
+          }
+          this.toastr.info(
+            `An account for ${err.email} was created with a password. Please enter your password to sign in and link your Google profile.`,
+            'Password Required',
+            { timeOut: 5000, closeButton: true, progressBar: true }
+          );
+        } else {
+          this.errorMessage = err?.message || 'Google authentication encountered an error. Please try again.';
+        }
       }
     });
   }

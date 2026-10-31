@@ -169,9 +169,21 @@ export class RegisterComponent implements OnInit, AfterViewInit {
         });
         this._Router.navigateByUrl('/home');
       },
-      error: () => {
+      error: (err: any) => {
         this.isGoogleLoading = false;
-        this.errorMessage = 'Google authentication encountered an error. Please try again.';
+        if (err?.code === 'ACCOUNT_EXISTS_WITH_PASSWORD') {
+          if (profile.picture) {
+            localStorage.setItem('user_avatar', profile.picture);
+          }
+          this.toastr.info(
+            `An account for ${err.email} already exists. Please sign in with your password.`,
+            'Account Exists',
+            { timeOut: 4000, closeButton: true, progressBar: true }
+          );
+          this._Router.navigate(['/login']);
+        } else {
+          this.errorMessage = err?.message || 'Google authentication encountered an error. Please try again.';
+        }
       }
     });
   }

@@ -105,17 +105,18 @@ export class AuthService {
   loginWithGoogle(googleUser: { email: string; name: string; picture?: string; sub: string }): Observable<any> {
     // Generate a secure deterministic password for RouteMisr backend authentication
     const deterministicPassword = `GoogleAuth#${googleUser.sub.slice(0, 8)}!2026`;
+    const silentHeader = { headers: { 'X-Silent-Error': 'true' } };
 
     return new Observable((observer) => {
-      // 1. Try to SignIn first
-      this.SignIn({ email: googleUser.email, password: deterministicPassword }).subscribe({
+      // 1. Try to SignIn first with silent header to avoid noisy interceptor toasts
+      this.SignIn({ email: googleUser.email, password: deterministicPassword }, silentHeader).subscribe({
         next: (res) => {
           this.handleSuccessfulAuth(res, googleUser.picture);
           observer.next(res);
           observer.complete();
         },
         error: (signInErr) => {
-          // 2. If user doesn't exist yet on RouteMisr backend, automatically SignUp
+          // 2. If user doesn't exist yet with Google password, attempt automatic SignUp
           const registerData = {
             name: googleUser.name || googleUser.email.split('@')[0],
             email: googleUser.email,
@@ -124,14 +125,29 @@ export class AuthService {
             phone: '01012345678'
           };
 
-          this.SignUp(registerData).subscribe({
+          this.SignUp(registerData, silentHeader).subscribe({
             next: (signUpRes) => {
               this.handleSuccessfulAuth(signUpRes, googleUser.picture);
               observer.next(signUpRes);
               observer.complete();
             },
             error: (signUpErr) => {
-              observer.error(signUpErr || signInErr);
+              const isAccountExists =
+                signUpErr?.status === 409 ||
+                signUpErr?.error?.message?.toLowerCase().includes('already exists') ||
+                signUpErr?.error?.message?.toLowerCase().includes('account already in use');
+
+              if (isAccountExists) {
+                observer.error({
+                  code: 'ACCOUNT_EXISTS_WITH_PASSWORD',
+                  email: googleUser.email,
+                  name: googleUser.name,
+                  picture: googleUser.picture,
+                  message: `An account for ${googleUser.email} already exists with a password. Please enter your password to sign in.`
+                });
+              } else {
+                observer.error(signUpErr || signInErr);
+              }
             }
           });
         }
@@ -139,12 +155,12 @@ export class AuthService {
     });
   }
 
-  SignUp(registerData: object): Observable<any> {
-    return this._HttpClient.post(`${environment.baseURL}/api/v1/auth/signup`, registerData);
+  SignUp(registerData: object, options?: { headers?: any }): Observable<any> {
+    return this._HttpClient.post(`${environment.baseURL}/api/v1/auth/signup`, registerData, options);
   }
 
-  SignIn(loginData: object): Observable<any> {
-    return this._HttpClient.post(`${environment.baseURL}/api/v1/auth/signin`, loginData);
+  SignIn(loginData: object, options?: { headers?: any }): Observable<any> {
+    return this._HttpClient.post(`${environment.baseURL}/api/v1/auth/signin`, loginData, options);
   }
 
   forgotPassword(email: object): Observable<any> {
