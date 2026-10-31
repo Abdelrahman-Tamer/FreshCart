@@ -31,22 +31,21 @@ export class GoogleAuthService {
       return Promise.resolve();
     }
 
-    if (this.scriptLoaded || (typeof google !== 'undefined' && google?.accounts?.id)) {
+    const existingScript = document.getElementById('google-gsi-client') as HTMLScriptElement | null;
+    if (existingScript && existingScript.src.includes('hl=en') && typeof google !== 'undefined' && google?.accounts?.id) {
       this.scriptLoaded = true;
       return Promise.resolve();
     }
 
-    return new Promise((resolve, reject) => {
-      const existingScript = document.getElementById('google-gsi-client');
-      if (existingScript) {
-        this.scriptLoaded = true;
-        resolve();
-        return;
-      }
+    if (existingScript && !existingScript.src.includes('hl=en')) {
+      existingScript.remove();
+      this.scriptLoaded = false;
+    }
 
+    return new Promise((resolve, reject) => {
       const script = document.createElement('script');
       script.id = 'google-gsi-client';
-      script.src = 'https://accounts.google.com/gsi/client';
+      script.src = 'https://accounts.google.com/gsi/client?hl=en';
       script.async = true;
       script.defer = true;
       script.onload = () => {
@@ -90,6 +89,11 @@ export class GoogleAuthService {
           auto_select: false,
           cancel_on_tap_outside: true
         });
+
+        const computedWidth = container.clientWidth
+          ? Math.min(380, Math.max(240, Math.floor(container.clientWidth)))
+          : 360;
+
         google.accounts.id.renderButton(container, {
           theme: 'outline',
           size: 'large',
@@ -97,7 +101,8 @@ export class GoogleAuthService {
           shape: 'rectangular',
           text: textType,
           logo_alignment: 'left',
-          width: 360
+          width: computedWidth,
+          locale: 'en'
         });
       }
     }).catch(err => {
