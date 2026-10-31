@@ -5,9 +5,6 @@ import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
 import { ProfileService, UserAddress, UserProfileData } from '../../services/profile/profile.service';
-import { CartService } from '../../../shared/services/Cart/cart.service';
-import { WishlistService } from '../../../shared/services/Wishlist/wishlist.service';
-import { PaymentService } from '../../../shared/services/Payment/payment.service';
 import { formatApiError } from '../../../core/utils/error-handler';
 
 type ProfileTab = 'overview' | 'addresses' | 'edit' | 'security';
@@ -22,9 +19,6 @@ type ProfileTab = 'overview' | 'addresses' | 'edit' | 'security';
 export class ProfileComponent implements OnInit {
   private readonly _ProfileService = inject(ProfileService);
   readonly _AuthService = inject(AuthService);
-  private readonly _CartService = inject(CartService);
-  private readonly _WishlistService = inject(WishlistService);
-  private readonly _PaymentService = inject(PaymentService);
   private readonly _FormBuilder = inject(FormBuilder);
   private readonly _Toastr = inject(ToastrService);
 
@@ -36,20 +30,36 @@ export class ProfileComponent implements OnInit {
   isDeletingAddressId: string | null = null;
   isAddAddressModalOpen = false;
 
+  // GPS Geolocation state
+  isDetectingLocation = false;
+  locationError: string | null = null;
+
+  // Feedback alerts
+  passwordErrorMessage: string | null = null;
+  passwordSuccessMessage: string | null = null;
+  profileErrorMessage: string | null = null;
+  profileSuccessMessage: string | null = null;
+
   userProfile: UserProfileData | null = null;
   addresses: UserAddress[] = [];
-  ordersCount = 0;
-  wishlistCount = 0;
-  cartCount = 0;
 
+  // Password visibility controls matching Login/Register pattern
   showCurrentPassword = false;
   showNewPassword = false;
   showRePassword = false;
 
   // Forms
   editProfileForm: FormGroup = this._FormBuilder.group({
-    name: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(30)]],
-    phone: ['', [Validators.required, Validators.pattern(/^(\+2)?01[0125][0-9]{8}$/)]]
+    name: ['', [
+      Validators.required,
+      Validators.minLength(3),
+      Validators.maxLength(30),
+      Validators.pattern(/^[a-zA-Z\u0600-\u06FF\s]+$/)
+    ]],
+    phone: ['', [
+      Validators.required,
+      Validators.pattern(/^(\+2)?01[0125][0-9]{8}$/)
+    ]]
   });
 
   newAddressForm: FormGroup = this._FormBuilder.group({
@@ -76,9 +86,9 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProfileData();
-    this.loadStats();
   }
 
+  // Getters for template bindings
   get userAvatar(): string {
     return this._AuthService.userAvatar;
   }
@@ -96,8 +106,22 @@ export class ProfileComponent implements OnInit {
     return '2026';
   }
 
+  // Form controls getters
+  get editNameControl() { return this.editProfileForm.get('name'); }
+  get editPhoneControl() { return this.editProfileForm.get('phone'); }
+
+  get currentPasswordControl() { return this.changePasswordForm.get('currentPassword'); }
+  get newPasswordControl() { return this.changePasswordForm.get('password'); }
+  get rePasswordControl() { return this.changePasswordForm.get('rePassword'); }
+
+  get addressNameControl() { return this.newAddressForm.get('name'); }
+  get addressDetailsControl() { return this.newAddressForm.get('details'); }
+  get addressPhoneControl() { return this.newAddressForm.get('phone'); }
+  get addressCityControl() { return this.newAddressForm.get('city'); }
+
+  // Password validation criteria (exact match with RegisterComponent)
   get newPasswordVal(): string {
-    return this.changePasswordForm.get('password')?.value || '';
+    return this.newPasswordControl?.value || '';
   }
 
   get hasMinLength(): boolean {
@@ -116,59 +140,37 @@ export class ProfileComponent implements OnInit {
     return /[^a-zA-Z\d]/.test(this.newPasswordVal);
   }
 
-  get passwordStrengthPercent(): number {
-    let score = 0;
-    if (this.hasMinLength) score += 20;
-    if (this.hasUpper) score += 20;
-    if (this.hasLower) score += 20;
-    if (this.hasNumber) score += 20;
-    if (this.hasSpecial) score += 20;
-    return score;
+  // Password visibility toggles
+  toggleCurrentPassword(): void {
+    this.showCurrentPassword = !this.showCurrentPassword;
   }
 
-  get passwordStrengthLabel(): string {
-    const p = this.passwordStrengthPercent;
-    if (p === 0) return 'Enter a password';
-    if (p <= 40) return 'Weak';
-    if (p <= 60) return 'Moderate';
-    if (p <= 80) return 'Good';
-    return 'Strong & Secure';
+  toggleNewPassword(): void {
+    this.showNewPassword = !this.showNewPassword;
   }
 
-  get passwordStrengthColor(): string {
-    const p = this.passwordStrengthPercent;
-    if (p <= 40) return 'bg-rose-500 text-rose-600';
-    if (p <= 60) return 'bg-amber-500 text-amber-600';
-    if (p <= 80) return 'bg-teal-500 text-teal-600';
-    return 'bg-emerald-500 text-emerald-600';
-  }
-
-  copiedId = false;
-
-  copyAccountId(id?: string): void {
-    if (!id) return;
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(id).then(() => {
-        this.copiedId = true;
-        this._Toastr.info('Account ID copied to clipboard', 'Copied!', { timeOut: 2000 });
-        setTimeout(() => this.copiedId = false, 2500);
-      }).catch(() => {});
-    }
-  }
-
-  setAddressLabelPreset(label: string): void {
-    this.newAddressForm.patchValue({ name: label });
+  toggleRePassword(): void {
+    this.showRePassword = !this.showRePassword;
   }
 
   passwordMatchValidator(form: AbstractControl) {
-    const pass = form.get('password')?.value;
-    const rePass = form.get('rePassword')?.value;
-    if (!pass || !rePass) return null;
-    return pass === rePass ? null : { mismatch: true };
+    const password = form.get('password')?.value;
+    const rePassword = form.get('rePassword')?.value;
+    if (!password || !rePassword) return null;
+    return password === rePassword ? null : { missMatch: true };
   }
 
   setTab(tab: ProfileTab): void {
     this.activeTab = tab;
+    this.passwordErrorMessage = null;
+    this.passwordSuccessMessage = null;
+    this.profileErrorMessage = null;
+    this.profileSuccessMessage = null;
+    this.locationError = null;
+  }
+
+  setAddressLabelPreset(label: string): void {
+    this.newAddressForm.patchValue({ name: label });
   }
 
   loadProfileData(): void {
@@ -187,7 +189,6 @@ export class ProfileComponent implements OnInit {
       },
       error: () => {
         this.isLoading = false;
-        // Fallback to token information if API has momentary glitch
         this._AuthService.decodeToken();
         const info = this._AuthService.userInfo;
         if (info) {
@@ -206,36 +207,6 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  loadStats(): void {
-    // 1. Wishlist count
-    this._WishlistService.getUserWishlist(true).subscribe({
-      next: (res: any) => {
-        this.wishlistCount = res?.count || res?.data?.length || 0;
-      },
-      error: () => {}
-    });
-
-    // 2. Cart count
-    this._CartService.GetLoggedUserCart(true).subscribe({
-      next: (res: any) => {
-        this.cartCount = res?.numOfCartItems || 0;
-      },
-      error: () => {}
-    });
-
-    // 3. Orders count
-    this._AuthService.decodeToken();
-    const userId = this._AuthService.userInfo?.id || this._AuthService.userInfo?._id;
-    if (userId) {
-      this._PaymentService.getUserOrders(userId).subscribe({
-        next: (orders: any) => {
-          this.ordersCount = Array.isArray(orders) ? orders.length : (orders?.data?.length || 0);
-        },
-        error: () => {}
-      });
-    }
-  }
-
   onUpdateProfile(): void {
     if (this.editProfileForm.invalid) {
       this.editProfileForm.markAllAsTouched();
@@ -243,6 +214,9 @@ export class ProfileComponent implements OnInit {
     }
 
     this.isUpdatingProfile = true;
+    this.profileErrorMessage = null;
+    this.profileSuccessMessage = null;
+
     const formVal = this.editProfileForm.value;
     this._ProfileService.updateUserProfile(formVal).subscribe({
       next: (_res: any) => {
@@ -251,16 +225,16 @@ export class ProfileComponent implements OnInit {
           this.userProfile.name = formVal.name;
           this.userProfile.phone = formVal.phone;
         }
-        this._Toastr.success('Your profile details have been updated successfully!', 'Profile Updated', {
-          timeOut: 3000,
-          closeButton: true,
-          progressBar: true
-        });
-        this.activeTab = 'overview';
+        this.profileSuccessMessage = 'Your profile details have been updated successfully.';
+        this._Toastr.success('Profile updated successfully!', 'Success');
+        setTimeout(() => {
+          this.activeTab = 'overview';
+        }, 1200);
       },
       error: (err: any) => {
         this.isUpdatingProfile = false;
         const formatted = formatApiError(err, '/updateMe');
+        this.profileErrorMessage = formatted.message;
         this._Toastr.error(formatted.message, formatted.title);
       }
     });
@@ -273,11 +247,91 @@ export class ProfileComponent implements OnInit {
       phone: this.userProfile?.phone || '',
       city: 'Cairo'
     });
+    this.locationError = null;
+    this.isDetectingLocation = false;
     this.isAddAddressModalOpen = true;
   }
 
   closeAddAddressModal(): void {
     this.isAddAddressModalOpen = false;
+    this.locationError = null;
+    this.isDetectingLocation = false;
+  }
+
+  // GPS Geolocation Support
+  useCurrentLocation(): void {
+    if (typeof window === 'undefined' || !('geolocation' in navigator)) {
+      this.locationError = 'Geolocation is not supported by your current browser.';
+      return;
+    }
+
+    this.isDetectingLocation = true;
+    this.locationError = null;
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        this.reverseGeocode(latitude, longitude);
+      },
+      (error) => {
+        this.isDetectingLocation = false;
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            this.locationError = 'Location access was denied. You can still enter your address manually below.';
+            break;
+          case error.POSITION_UNAVAILABLE:
+            this.locationError = 'GPS location is currently unavailable on your device.';
+            break;
+          case error.TIMEOUT:
+            this.locationError = 'Location request timed out. Please enter your address details manually.';
+            break;
+          default:
+            this.locationError = 'Unable to determine your location. Please enter manually.';
+            break;
+        }
+      },
+      { timeout: 10000, enableHighAccuracy: true }
+    );
+  }
+
+  private reverseGeocode(lat: number, lon: number): void {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lon}`;
+    fetch(url, { headers: { Accept: 'application/json' } })
+      .then((res) => {
+        if (!res.ok) throw new Error('Geocoding service unavailable');
+        return res.json();
+      })
+      .then((data) => {
+        this.isDetectingLocation = false;
+        const addr = data?.address || {};
+
+        const streetParts = [
+          addr.house_number,
+          addr.road,
+          addr.suburb || addr.neighbourhood || addr.quarter,
+          addr.city_district
+        ].filter(Boolean);
+
+        const readableDetails = streetParts.length > 0
+          ? streetParts.join(', ')
+          : (data?.display_name?.split(',').slice(0, 3).join(', ') || '');
+
+        if (readableDetails) {
+          this.newAddressForm.patchValue({ details: readableDetails });
+        }
+
+        const detectedCity = (addr.city || addr.state || addr.governorate || addr.town || addr.county || '').toLowerCase();
+        const matchedCity = this.cities.find((c) => detectedCity.includes(c.toLowerCase()));
+        if (matchedCity) {
+          this.newAddressForm.patchValue({ city: matchedCity });
+        }
+
+        this._Toastr.info('Detected location details filled. Please review and adjust before saving.', 'Location Detected');
+      })
+      .catch(() => {
+        this.isDetectingLocation = false;
+        this.locationError = 'Could not lookup address name for your location. Please enter street details manually.';
+      });
   }
 
   onAddAddress(): void {
@@ -299,11 +353,7 @@ export class ProfileComponent implements OnInit {
             this.userProfile.addresses = res.data;
           }
         }
-        this._Toastr.success('New delivery address has been saved!', 'Address Added', {
-          timeOut: 3000,
-          closeButton: true,
-          progressBar: true
-        });
+        this._Toastr.success('New delivery address has been saved!', 'Address Saved');
       },
       error: (err: any) => {
         this.isSavingAddress = false;
@@ -328,11 +378,7 @@ export class ProfileComponent implements OnInit {
         } else {
           this.addresses = this.addresses.filter(a => a._id !== addressId);
         }
-        this._Toastr.success('Address removed from your address book.', 'Address Deleted', {
-          timeOut: 2500,
-          closeButton: true,
-          progressBar: true
-        });
+        this._Toastr.success('Address removed from your address book.', 'Address Removed');
       },
       error: (err: any) => {
         this.isDeletingAddressId = null;
@@ -349,25 +395,30 @@ export class ProfileComponent implements OnInit {
     }
 
     this.isChangingPassword = true;
+    this.passwordErrorMessage = null;
+    this.passwordSuccessMessage = null;
+
     const payload = this.changePasswordForm.value;
     this._ProfileService.changePassword(payload).subscribe({
       next: (res: any) => {
         this.isChangingPassword = false;
         this.changePasswordForm.reset();
-        // RouteMisr returns a fresh token upon password change
+        this.passwordSuccessMessage = 'Your password has been changed successfully.';
+
         if (res?.token) {
           this._AuthService.handleSuccessfulAuth(res, this.userAvatar);
         }
-        this._Toastr.success('Your password has been changed successfully!', 'Security Updated', {
-          timeOut: 3500,
-          closeButton: true,
-          progressBar: true
-        });
-        this.activeTab = 'overview';
+
+        this._Toastr.success('Password changed successfully!', 'Security Updated');
+        setTimeout(() => {
+          this.activeTab = 'overview';
+          this.passwordSuccessMessage = null;
+        }, 1500);
       },
       error: (err: any) => {
         this.isChangingPassword = false;
         const formatted = formatApiError(err, '/changeMyPassword');
+        this.passwordErrorMessage = formatted.message;
         this._Toastr.error(formatted.message, formatted.title);
       }
     });
