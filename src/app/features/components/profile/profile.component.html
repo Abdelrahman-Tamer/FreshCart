@@ -816,7 +816,14 @@
             <span class="text-[11px] text-neutral-400 font-normal">Click or drag pin to adjust</span>
           </div>
 
-          <div id="address-map" class="w-full h-44 sm:h-48 rounded-xl border border-neutral-200 overflow-hidden shadow-inner relative z-0"></div>
+          <div id="address-map" class="w-full h-44 sm:h-48 rounded-xl border border-neutral-200 overflow-hidden shadow-inner relative z-0 bg-slate-100">
+            <div class="h-full w-full flex flex-col items-center justify-center text-slate-400 gap-1.5 p-4 text-center pointer-events-none">
+              <svg class="w-6 h-6 animate-pulse text-emerald-600/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
+              <span class="text-xs font-medium text-slate-500">Loading interactive map...</span>
+            </div>
+          </div>
 
           @if (currentCoords) {
             <div class="flex items-center justify-between mt-1 text-[10px] text-neutral-400 font-mono">

@@ -324,7 +324,14 @@ export class ProfileComponent implements OnInit, OnDestroy {
     }
 
     try {
-      const L = await import('leaflet');
+      const leafletModule: any = await import('leaflet');
+      const L: any = (typeof window !== 'undefined' && (window as any).L)
+        ? (window as any).L
+        : (leafletModule.default || leafletModule);
+
+      if (!L || typeof L.map !== 'function') {
+        throw new Error('Leaflet map function is unavailable in module');
+      }
 
       const defaultLat = this.currentCoords?.lat || 30.0444;
       const defaultLng = this.currentCoords?.lng || 31.2357;
@@ -389,8 +396,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
       setTimeout(() => this.map?.invalidateSize(), 100);
       setTimeout(() => this.map?.invalidateSize(), 300);
       setTimeout(() => this.map?.invalidateSize(), 600);
-    } catch {
-      // Graceful fallback if map cannot load
+    } catch (err) {
+      console.error('Failed to initialize interactive map:', err);
     }
   }
 
