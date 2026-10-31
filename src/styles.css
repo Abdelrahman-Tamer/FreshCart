@@ -2,6 +2,7 @@
 @plugin "flowbite/plugin";
 @source "../node_modules/flowbite";
 @import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
 
 /* ==========================================================================
    FreshCart Design System Tokens

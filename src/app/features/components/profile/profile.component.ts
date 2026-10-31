@@ -1,5 +1,5 @@
-import { Component, inject, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, inject, OnInit, OnDestroy, PLATFORM_ID } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ToastrService } from 'ngx-toastr';
@@ -16,11 +16,12 @@ type ProfileTab = 'overview' | 'addresses' | 'edit' | 'security';
   templateUrl: './profile.component.html',
   styleUrl: './profile.component.css'
 })
-export class ProfileComponent implements OnInit {
+export class ProfileComponent implements OnInit, OnDestroy {
   private readonly _ProfileService = inject(ProfileService);
   readonly _AuthService = inject(AuthService);
   private readonly _FormBuilder = inject(FormBuilder);
   private readonly _Toastr = inject(ToastrService);
+  private readonly platformId = inject(PLATFORM_ID);
 
   activeTab: ProfileTab = 'overview';
   isLoading = true;
@@ -30,9 +31,12 @@ export class ProfileComponent implements OnInit {
   isDeletingAddressId: string | null = null;
   isAddAddressModalOpen = false;
 
-  // GPS Geolocation state
+  // GPS & Map state
   isDetectingLocation = false;
   locationError: string | null = null;
+  currentCoords: { lat: number; lng: number } | null = null;
+  private map: any = null;
+  private marker: any = null;
 
   // Feedback alerts
   passwordErrorMessage: string | null = null;
@@ -86,6 +90,10 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadProfileData();
+  }
+
+  ngOnDestroy(): void {
+    this.destroyMap();
   }
 
   // Getters for template bindings
@@ -250,15 +258,103 @@ export class ProfileComponent implements OnInit {
     this.locationError = null;
     this.isDetectingLocation = false;
     this.isAddAddressModalOpen = true;
+
+    // Initialize interactive map once modal is mounted
+    setTimeout(() => {
+      this.initInteractiveMap();
+    }, 150);
   }
 
   closeAddAddressModal(): void {
     this.isAddAddressModalOpen = false;
     this.locationError = null;
     this.isDetectingLocation = false;
+    this.destroyMap();
   }
 
-  // GPS & Network Geolocation Support
+  private destroyMap(): void {
+    if (this.map) {
+      this.map.remove();
+      this.map = null;
+      this.marker = null;
+    }
+  }
+
+  // Interactive Leaflet Map initialization (Browser-only, SSR-safe)
+  private async initInteractiveMap(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+
+    const mapElement = document.getElementById('address-map');
+    if (!mapElement) return;
+
+    this.destroyMap();
+
+    try {
+      const L = await import('leaflet');
+
+      const defaultLat = this.currentCoords?.lat || 30.0444;
+      const defaultLng = this.currentCoords?.lng || 31.2357;
+      const defaultZoom = this.currentCoords ? 16 : 13;
+
+      this.map = L.map(mapElement, {
+        center: [defaultLat, defaultLng],
+        zoom: defaultZoom,
+        zoomControl: true
+      });
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap'
+      }).addTo(this.map);
+
+      // Custom crisp emerald location marker
+      const pinIcon = L.divIcon({
+        className: 'freshcart-map-marker',
+        html: `
+          <div style="transform: translate(-50%, -100%); position: relative;">
+            <div style="background-color: #059669; width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(5,150,105,0.45); border: 2.5px solid #ffffff;">
+              <svg style="width: 18px; height: 18px; color: #ffffff;" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+              </svg>
+            </div>
+            <div style="width: 12px; height: 4px; background: rgba(0,0,0,0.35); border-radius: 50%; filter: blur(1px); margin: 2px auto 0;"></div>
+          </div>
+        `,
+        iconSize: [34, 34],
+        iconAnchor: [17, 34]
+      });
+
+      this.marker = L.marker([defaultLat, defaultLng], {
+        icon: pinIcon,
+        draggable: true
+      }).addTo(this.map);
+
+      // Listen to marker dragend to update address details
+      this.marker.on('dragend', () => {
+        const pos = this.marker.getLatLng();
+        this.currentCoords = { lat: pos.lat, lng: pos.lng };
+        this.reverseGeocode(pos.lat, pos.lng);
+      });
+
+      // Listen to map click to place pin exactly where user taps
+      this.map.on('click', (e: any) => {
+        const latlng = e.latlng;
+        this.marker.setLatLng(latlng);
+        this.currentCoords = { lat: latlng.lat, lng: latlng.lng };
+        this.reverseGeocode(latlng.lat, latlng.lng);
+      });
+
+      setTimeout(() => {
+        if (this.map) {
+          this.map.invalidateSize();
+        }
+      }, 250);
+    } catch {
+      // Graceful fallback if map cannot load
+    }
+  }
+
+  // GPS & High-Precision Geolocation Support
   useCurrentLocation(): void {
     if (typeof window === 'undefined' || !('geolocation' in navigator)) {
       this.detectLocationByIp();
@@ -268,23 +364,45 @@ export class ProfileComponent implements OnInit {
     this.isDetectingLocation = true;
     this.locationError = null;
 
+    // 1. First attempt: High-accuracy hardware location
     navigator.geolocation.getCurrentPosition(
       (position) => {
         const { latitude, longitude } = position.coords;
-        this.reverseGeocode(latitude, longitude);
+        this.applyDetectedLocation(latitude, longitude, false);
       },
       (error) => {
         if (error.code === error.PERMISSION_DENIED) {
           this.isDetectingLocation = false;
-          this.locationError = 'Location access was denied. You can enter your address details manually below.';
+          this.locationError = 'Location access was denied. You can still tap directly on the map to pinpoint your location.';
           return;
         }
-        // If timeout or hardware unavailable (common on PCs/laptops without GPS chip), seamlessly fallback to IP location
-        this.detectLocationByIp();
+
+        // 2. Second attempt: Standard Wi-Fi/network accuracy
+        navigator.geolocation.getCurrentPosition(
+          (fallbackPos) => {
+            const { latitude, longitude } = fallbackPos.coords;
+            this.applyDetectedLocation(latitude, longitude, false);
+          },
+          () => {
+            // 3. Third attempt: Network IP lookup fallback
+            this.detectLocationByIp();
+          },
+          { timeout: 7000, enableHighAccuracy: false, maximumAge: 300000 }
+        );
       },
-      // enableHighAccuracy: false ensures standard Wi-Fi/IP location without waiting for non-existent GPS chips
-      { timeout: 7000, enableHighAccuracy: false, maximumAge: 300000 }
+      { timeout: 6000, enableHighAccuracy: true, maximumAge: 60000 }
     );
+  }
+
+  private applyDetectedLocation(lat: number, lng: number, isIpFallback = false): void {
+    this.currentCoords = { lat, lng };
+
+    if (this.map && this.marker) {
+      this.map.flyTo([lat, lng], 17, { duration: 1.2 });
+      this.marker.setLatLng([lat, lng]);
+    }
+
+    this.reverseGeocode(lat, lng, isIpFallback);
   }
 
   private detectLocationByIp(): void {
@@ -298,19 +416,19 @@ export class ProfileComponent implements OnInit {
         if (!data || !data.success) throw new Error('IP lookup failed');
 
         if (data.latitude && data.longitude) {
-          this.reverseGeocode(data.latitude, data.longitude, true);
+          this.applyDetectedLocation(data.latitude, data.longitude, true);
         } else {
           this.isDetectingLocation = false;
           const detectedCity = this.matchCity(data.city || data.region || '');
           if (detectedCity) {
             this.newAddressForm.patchValue({ city: detectedCity });
           }
-          this._Toastr.info('City detected from network. Please enter your street address details.', 'Location Detected');
+          this._Toastr.info('City detected from network. Please tap your exact location on the map.', 'Location Detected');
         }
       })
       .catch(() => {
         this.isDetectingLocation = false;
-        this.locationError = 'Could not detect your location automatically. Please enter your address details manually.';
+        this.locationError = 'Could not detect your location automatically. You can tap directly on the map to place your pin.';
       });
   }
 
@@ -347,13 +465,13 @@ export class ProfileComponent implements OnInit {
         }
 
         const msg = isFallback
-          ? 'Approximate location detected via network. Please review your street details.'
-          : 'Detected location details filled. Please review and adjust before saving.';
-        this._Toastr.info(msg, 'Location Detected');
+          ? 'Approximate location detected via network. Please adjust pin on map if needed.'
+          : 'Exact location pinned on map and address details filled!';
+        this._Toastr.info(msg, 'Location Pinned');
       })
       .catch(() => {
         this.isDetectingLocation = false;
-        this.locationError = 'Could not lookup exact street address. Please enter details manually.';
+        this.locationError = 'Could not lookup exact street name. Please review street details manually.';
       });
   }
 
@@ -407,6 +525,7 @@ export class ProfileComponent implements OnInit {
       next: (res: any) => {
         this.isSavingAddress = false;
         this.isAddAddressModalOpen = false;
+        this.destroyMap();
         if (res?.data) {
           this.addresses = res.data;
           if (this.userProfile) {

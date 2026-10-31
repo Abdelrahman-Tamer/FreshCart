@@ -675,10 +675,10 @@
   </div>
 </div>
 
-<!-- ==================== ADD ADDRESS MODAL (WITH GPS SUPPORT) ==================== -->
+<!-- ==================== ADD ADDRESS MODAL (WITH GPS & INTERACTIVE MAP) ==================== -->
 @if (isAddAddressModalOpen) {
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fadeIn" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-    <div class="bg-white rounded-2xl max-w-md w-full p-6 sm:p-7 shadow-xl border border-neutral-200/80 space-y-4 animate-scaleUp">
+    <div class="bg-white rounded-2xl max-w-lg w-full p-6 sm:p-7 shadow-xl border border-neutral-200/80 space-y-4 animate-scaleUp max-h-[92vh] overflow-y-auto">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
@@ -724,14 +724,14 @@
             type="button" 
             (click)="useCurrentLocation()" 
             [disabled]="isDetectingLocation"
-            class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer"
+            class="w-full inline-flex items-center justify-center gap-2 px-3 py-2 rounded-xl border border-emerald-200 bg-emerald-50 hover:bg-emerald-100/80 text-emerald-800 text-xs font-semibold transition-colors disabled:opacity-60 cursor-pointer shadow-2xs"
           >
             @if (isDetectingLocation) {
               <svg class="animate-spin w-3.5 h-3.5 text-emerald-700" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
               </svg>
-              <span>Detecting your location...</span>
+              <span>Pinpointing exact location on map...</span>
             } @else {
               <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
@@ -748,6 +748,28 @@
               </svg>
               <span>{{ locationError }}</span>
             </p>
+          }
+        </div>
+
+        <!-- Interactive Map Preview & Pinpoint Selector -->
+        <div>
+          <div class="flex items-center justify-between text-xs font-semibold text-neutral-700 mb-1.5">
+            <span class="flex items-center gap-1.5">
+              <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/>
+              </svg>
+              <span>Pinpoint Location on Map</span>
+            </span>
+            <span class="text-[11px] text-neutral-400 font-normal">Click or drag pin to adjust</span>
+          </div>
+
+          <div id="address-map" class="w-full h-44 sm:h-48 rounded-xl border border-neutral-200 overflow-hidden shadow-inner relative z-0"></div>
+
+          @if (currentCoords) {
+            <div class="flex items-center justify-between mt-1 text-[10px] text-neutral-400 font-mono">
+              <span>Lat: {{ currentCoords.lat | number:'1.4-4' }}</span>
+              <span>Lng: {{ currentCoords.lng | number:'1.4-4' }}</span>
+            </div>
           }
         </div>
 
