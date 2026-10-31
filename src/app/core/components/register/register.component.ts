@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -20,12 +20,14 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './register.component.html',
   styleUrl: './register.component.css',
 })
-export class RegisterComponent implements OnInit {
+export class RegisterComponent implements OnInit, AfterViewInit {
 
   private readonly _AuthService = inject(AuthService);
   private readonly _Router = inject(Router);
   readonly googleAuth = inject(GoogleAuthService);
   private readonly toastr = inject(ToastrService);
+
+  @ViewChild('googleBtnRef') googleBtnRef?: ElementRef<HTMLDivElement>;
 
   isLoading = false;
   isGoogleLoading = false;
@@ -65,6 +67,18 @@ export class RegisterComponent implements OnInit {
       this.googleAuth.initGoogleId((credentialResponse) => {
         this.onGoogleCredential(credentialResponse);
       });
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (this.googleAuth.isConfigured && this.googleBtnRef?.nativeElement) {
+      this.googleAuth.renderGoogleButton(
+        this.googleBtnRef.nativeElement,
+        (credentialResponse) => {
+          this.onGoogleCredential(credentialResponse);
+        },
+        'signup_with'
+      );
     }
   }
 

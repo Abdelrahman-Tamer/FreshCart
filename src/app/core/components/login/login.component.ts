@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../../shared/services/authentication/auth.service';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -14,7 +14,7 @@ import { ToastrService } from 'ngx-toastr';
   templateUrl: './login.component.html',
   styleUrl: './login.component.css'
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, AfterViewInit {
 
   private readonly _FormBuilder = inject(FormBuilder);
   private readonly _AuthService = inject(AuthService);
@@ -24,13 +24,14 @@ export class LoginComponent implements OnInit {
   readonly googleAuth = inject(GoogleAuthService);
   private readonly toastr = inject(ToastrService);
 
+  @ViewChild('googleBtnRef') googleBtnRef?: ElementRef<HTMLDivElement>;
+
   isLoading = false;
   isGoogleLoading = false;
   isGoogleModalOpen = false;
   errorMessage = '';
   showPassword = false;
 
-  // Quick account options for development / preview mode
   customGoogleName = 'Mohamed Ali';
   customGoogleEmail = 'mohamed.freshcart@gmail.com';
 
@@ -42,6 +43,14 @@ export class LoginComponent implements OnInit {
   ngOnInit(): void {
     if (this.googleAuth.isConfigured) {
       this.googleAuth.initGoogleId((credentialResponse) => {
+        this.onGoogleCredential(credentialResponse);
+      });
+    }
+  }
+
+  ngAfterViewInit(): void {
+    if (this.googleAuth.isConfigured && this.googleBtnRef?.nativeElement) {
+      this.googleAuth.renderGoogleButton(this.googleBtnRef.nativeElement, (credentialResponse) => {
         this.onGoogleCredential(credentialResponse);
       });
     }
@@ -89,12 +98,10 @@ export class LoginComponent implements OnInit {
 
   handleGoogleSignInClick(): void {
     if (this.googleAuth.isConfigured) {
-      // Trigger official Google One Tap or prompt
       this.googleAuth.initGoogleId((credentialResponse) => {
         this.onGoogleCredential(credentialResponse);
       });
     } else {
-      // Open instant Google account selector dialog
       this.isGoogleModalOpen = true;
     }
   }

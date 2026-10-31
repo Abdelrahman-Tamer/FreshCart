@@ -75,7 +75,11 @@ export class GoogleAuthService {
     });
   }
 
-  renderGoogleButton(container: HTMLElement, callback: (credentialResponse: any) => void): void {
+  renderGoogleButton(
+    container: HTMLElement,
+    callback: (credentialResponse: any) => void,
+    textType: 'continue_with' | 'signup_with' | 'signin_with' = 'continue_with'
+  ): void {
     if (!isPlatformBrowser(this.platformId) || !this.isConfigured) return;
 
     this.loadGoogleScript().then(() => {
@@ -91,11 +95,13 @@ export class GoogleAuthService {
           size: 'large',
           type: 'standard',
           shape: 'rectangular',
-          text: 'signin_with',
+          text: textType,
           logo_alignment: 'left',
-          width: 380
+          width: 360
         });
       }
+    }).catch(err => {
+      console.warn('Error initializing Google Sign-In button:', err);
     });
   }
 
