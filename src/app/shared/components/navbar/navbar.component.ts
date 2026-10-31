@@ -64,6 +64,14 @@ export class NavbarComponent implements OnInit, OnDestroy {
       },
     });
 
+    // Real-time synchronization whenever the user name is updated anywhere
+    const nameSub = this._AuthService.userName$.subscribe((name) => {
+      if (this.isLoggedIn && name) {
+        this.userName = name;
+      }
+    });
+    this.subscription.add(nameSub);
+
     if (this._AuthService.isAuthenticated()) {
       this.isLoggedIn = true;
       this._AuthService.decodeToken();

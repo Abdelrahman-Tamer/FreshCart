@@ -18,6 +18,9 @@ export function formatApiError(err: any, requestUrl?: string): FormattedError {
   const isCart = url.includes('/cart');
   const isWishlist = url.includes('/wishlist');
   const isOrders = url.includes('/orders');
+  const isChangePassword = url.includes('/changemypassword') || url.includes('/changepassword');
+  const isUpdateProfile = url.includes('/updateme') || url.includes('/updateuser');
+  const isAddress = url.includes('/addresses');
 
   // 1. Connection / Network errors (status 0 or no response)
   if (!err || err.status === 0 || err.name === 'TimeoutError') {
@@ -91,6 +94,12 @@ export function formatApiError(err: any, requestUrl?: string): FormattedError {
         message: capitalizeFirstLetter(extractedMsg) + '.'
       };
     }
+    if (isChangePassword && (lower.includes('current password') || lower.includes('user password') || lower.includes('wrong password') || lower.includes('incorrect password'))) {
+      return {
+        title: 'Incorrect Current Password',
+        message: 'The current password you entered is incorrect. Please verify and try again.'
+      };
+    }
   }
 
   // 5. Status-specific intelligent fallbacks
@@ -98,7 +107,7 @@ export function formatApiError(err: any, requestUrl?: string): FormattedError {
     case 400: {
       if (extractedMsg) {
         return {
-          title: isSignIn ? 'Sign In Failed' : isSignUp ? 'Registration Error' : 'Invalid Information',
+          title: isSignIn ? 'Sign In Failed' : isSignUp ? 'Registration Error' : isChangePassword ? 'Password Error' : isUpdateProfile ? 'Profile Error' : isAddress ? 'Address Error' : 'Invalid Information',
           message: capitalizeFirstLetter(extractedMsg)
         };
       }
@@ -112,6 +121,18 @@ export function formatApiError(err: any, requestUrl?: string): FormattedError {
         return {
           title: 'Registration Error',
           message: 'Please ensure all required fields are filled out correctly.'
+        };
+      }
+      if (isChangePassword) {
+        return {
+          title: 'Password Update Failed',
+          message: 'Please ensure your current password is correct and your new password meets the requirements.'
+        };
+      }
+      if (isUpdateProfile) {
+        return {
+          title: 'Profile Update Failed',
+          message: 'Please check your name and phone number and try again.'
         };
       }
       if (isResetCode) {
@@ -131,6 +152,12 @@ export function formatApiError(err: any, requestUrl?: string): FormattedError {
         return {
           title: 'Sign In Failed',
           message: 'Incorrect email or password. Please try again.'
+        };
+      }
+      if (isChangePassword) {
+        return {
+          title: 'Incorrect Current Password',
+          message: 'The current password entered is incorrect. Please verify and try again.'
         };
       }
       return {

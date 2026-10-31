@@ -19,6 +19,9 @@ export class AuthService {
   private loginStatus = new BehaviorSubject<boolean>(false);
   isLoggedIn = this.loginStatus.asObservable();
 
+  private userNameSubject = new BehaviorSubject<string>('');
+  userName$ = this.userNameSubject.asObservable();
+
   constructor() {
     if (isPlatformBrowser(this.platformId)) {
       const token = this._CookieService.get('token');
@@ -34,6 +37,10 @@ export class AuthService {
   }
 
   get userName(): string {
+    if (isPlatformBrowser(this.platformId)) {
+      const stored = localStorage.getItem('user_name');
+      if (stored) return stored;
+    }
     return this.userInfo?.name || '';
   }
 
@@ -71,9 +78,23 @@ export class AuthService {
     const token = this._CookieService.get('token');
     if (token && this.isTokenValid(token)) {
       this.userInfo = jwtDecode(token);
+      const customName = localStorage.getItem('user_name');
+      const resolved = customName || this.userInfo?.name || '';
+      this.userNameSubject.next(resolved);
     } else if (token) {
       this.logOut();
     }
+  }
+
+  updateUserName(newName: string): void {
+    if (!newName) return;
+    if (this.userInfo) {
+      this.userInfo.name = newName;
+    }
+    if (isPlatformBrowser(this.platformId)) {
+      localStorage.setItem('user_name', newName);
+    }
+    this.userNameSubject.next(newName);
   }
 
   updateLoginStatus(status: boolean) {
@@ -84,20 +105,31 @@ export class AuthService {
     this._CookieService.delete('token', '/');
     this.userInfo = null;
     this.loginStatus.next(false);
+    this.userNameSubject.next('');
     if (isPlatformBrowser(this.platformId)) {
       localStorage.removeItem('wishlist');
       localStorage.removeItem('checkout_session');
       localStorage.removeItem('user_avatar');
+      localStorage.removeItem('user_name');
     }
   }
 
-  handleSuccessfulAuth(res: any, avatarUrl?: string) {
+  handleSuccessfulAuth(res: any, avatarUrl?: string, customName?: string) {
     if (res?.token) {
       this._CookieService.set('token', res.token, { path: '/', sameSite: 'Lax' });
-      if (isPlatformBrowser(this.platformId) && avatarUrl) {
-        localStorage.setItem('user_avatar', avatarUrl);
+      const name = customName || res.user?.name || res.data?.user?.name;
+      if (isPlatformBrowser(this.platformId)) {
+        if (avatarUrl) {
+          localStorage.setItem('user_avatar', avatarUrl);
+        }
+        if (name) {
+          localStorage.setItem('user_name', name);
+        }
       }
       this.decodeToken();
+      if (name) {
+        this.updateUserName(name);
+      }
       this.updateLoginStatus(true);
     }
   }
@@ -111,7 +143,7 @@ export class AuthService {
       // 1. Try to SignIn first with silent header to avoid noisy interceptor toasts
       this.SignIn({ email: googleUser.email, password: deterministicPassword }, silentHeader).subscribe({
         next: (res) => {
-          this.handleSuccessfulAuth(res, googleUser.picture);
+          this.handleSuccessfulAuth(res, googleUser.picture, googleUser.name);
           observer.next(res);
           observer.complete();
         },
@@ -127,7 +159,7 @@ export class AuthService {
 
           this.SignUp(registerData, silentHeader).subscribe({
             next: (signUpRes) => {
-              this.handleSuccessfulAuth(signUpRes, googleUser.picture);
+              this.handleSuccessfulAuth(signUpRes, googleUser.picture, googleUser.name);
               observer.next(signUpRes);
               observer.complete();
             },

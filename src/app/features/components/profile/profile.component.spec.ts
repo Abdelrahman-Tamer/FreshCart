@@ -143,6 +143,36 @@ describe('ProfileComponent', () => {
     expect(mockProfileService.updateUserProfile).toHaveBeenCalled();
   });
 
+  it('should validate editProfileForm name maxlength (<=30) and nameLength getter', () => {
+    component.editProfileForm.patchValue({
+      name: 'Abdelrahamnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn', // 48 chars (> 30)
+      phone: '01012345678'
+    });
+    expect(component.editNameControl?.hasError('maxlength')).toBeTrue();
+    expect(component.nameLength).toBe(48);
+
+    component.editProfileForm.patchValue({
+      name: 'Abdo Tamer',
+      phone: '01012345678'
+    });
+    expect(component.editNameControl?.valid).toBeTrue();
+    expect(component.nameLength).toBe(10);
+  });
+
+  it('should validate changePasswordForm confirm password required and mismatch', () => {
+    component.changePasswordForm.patchValue({
+      currentPassword: 'ValidPass123!',
+      password: 'StrongPass123!',
+      rePassword: ''
+    });
+    expect(component.rePasswordControl?.hasError('required')).toBeTrue();
+
+    component.changePasswordForm.patchValue({
+      rePassword: 'DifferentPass123!'
+    });
+    expect(component.changePasswordForm.hasError('missMatch')).toBeTrue();
+  });
+
   it('should call changePassword when form is valid and show success', () => {
     component.changePasswordForm.patchValue({
       currentPassword: 'ValidPass123!',

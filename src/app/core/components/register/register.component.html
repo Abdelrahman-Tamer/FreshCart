@@ -90,16 +90,20 @@
             />
           </div>
           @if (nameControl?.invalid && (nameControl?.touched || nameControl?.dirty)) {
-            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1">
-              <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1.5 animate-fadeIn">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
               @if (nameControl?.errors?.['required']) {
-                Name is required
+                <span>Full name is required</span>
               } @else if (nameControl?.errors?.['minlength']) {
-                Name must be at least 3 characters
+                <span>Name must be at least 3 characters</span>
+              } @else if (nameControl?.errors?.['maxlength']) {
+                <span>Name cannot exceed 25 characters</span>
               } @else if (nameControl?.errors?.['pattern']) {
-                Name should only contain letters and spaces
+                <span>Name should only contain letters and spaces</span>
+              } @else {
+                <span>Please enter a valid full name</span>
               }
             </p>
           }
@@ -284,12 +288,18 @@
               }
             </button>
           </div>
-          @if ((rePasswordControl?.touched || rePasswordControl?.dirty) && registerForm.hasError('missMatch')) {
-            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1">
-              <svg class="w-3 h-3 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+          @if ((rePasswordControl?.touched || rePasswordControl?.dirty) && (rePasswordControl?.invalid || registerForm.hasError('missMatch'))) {
+            <p class="text-[11px] text-red-600 font-medium mt-1.5 flex items-center gap-1.5 animate-fadeIn">
+              <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
               </svg>
-              Passwords do not match
+              @if (rePasswordControl?.errors?.['required']) {
+                <span>Confirm password is required</span>
+              } @else if (registerForm.hasError('missMatch')) {
+                <span>Passwords do not match</span>
+              } @else {
+                <span>Please confirm your password</span>
+              }
             </p>
           }
         </div>

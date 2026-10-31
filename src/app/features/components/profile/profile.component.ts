@@ -117,6 +117,7 @@ export class ProfileComponent implements OnInit, OnDestroy {
   // Form controls getters
   get editNameControl() { return this.editProfileForm.get('name'); }
   get editPhoneControl() { return this.editProfileForm.get('phone'); }
+  get nameLength(): number { return this.editNameControl?.value?.length || 0; }
 
   get currentPasswordControl() { return this.changePasswordForm.get('currentPassword'); }
   get newPasswordControl() { return this.changePasswordForm.get('password'); }
@@ -193,6 +194,9 @@ export class ProfileComponent implements OnInit, OnDestroy {
             name: res.data.name,
             phone: res.data.phone || ''
           });
+          if (res.data.name) {
+            this._AuthService.updateUserName(res.data.name);
+          }
         }
       },
       error: () => {
@@ -227,12 +231,19 @@ export class ProfileComponent implements OnInit, OnDestroy {
 
     const formVal = this.editProfileForm.value;
     this._ProfileService.updateUserProfile(formVal).subscribe({
-      next: (_res: any) => {
+      next: (res: any) => {
         this.isUpdatingProfile = false;
+        const updatedName = res?.data?.user?.name || res?.user?.name || formVal.name;
+        const updatedPhone = res?.data?.user?.phone || res?.user?.phone || formVal.phone;
+
         if (this.userProfile) {
-          this.userProfile.name = formVal.name;
-          this.userProfile.phone = formVal.phone;
+          this.userProfile.name = updatedName;
+          this.userProfile.phone = updatedPhone;
         }
+
+        // Live real-time synchronization across AuthService and Navbar
+        this._AuthService.updateUserName(updatedName);
+
         this.profileSuccessMessage = 'Your profile details have been updated successfully.';
         this._Toastr.success('Profile updated successfully!', 'Success');
         setTimeout(() => {
