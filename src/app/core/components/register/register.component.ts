@@ -63,11 +63,6 @@ export class RegisterComponent implements OnInit, AfterViewInit {
   );
 
   ngOnInit(): void {
-    if (this.googleAuth.isConfigured) {
-      this.googleAuth.initGoogleId((credentialResponse) => {
-        this.onGoogleCredential(credentialResponse);
-      });
-    }
   }
 
   ngAfterViewInit(): void {

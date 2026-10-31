@@ -41,11 +41,6 @@ export class LoginComponent implements OnInit, AfterViewInit {
   });
 
   ngOnInit(): void {
-    if (this.googleAuth.isConfigured) {
-      this.googleAuth.initGoogleId((credentialResponse) => {
-        this.onGoogleCredential(credentialResponse);
-      });
-    }
   }
 
   ngAfterViewInit(): void {
